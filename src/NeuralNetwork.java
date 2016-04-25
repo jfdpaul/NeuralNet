@@ -1,5 +1,6 @@
 import AlgebraHelper.Matrix;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /* 4/22/2016 */
@@ -7,10 +8,16 @@ import java.util.ArrayList;
 /**
  * Class to implement Neural Network
  *
+ * <p>
+ *     In this implementation, the use of Matrix class has been made.
+ * </p>
+ *
  * @suthor Jonathan Fidelis Paul
+ * @see Matrix
  * @since 1.0
+ *
  */
-public class NeuralNetwork {
+public class NeuralNetwork implements Serializable{
 
     /**DATA MEMBERS*/
     int layer_count;        //Keeps the count of layers i.e. weight matrices
@@ -28,13 +35,13 @@ public class NeuralNetwork {
     Matrix dataO;           //Matrix holding output training data
 
     /**CONSTRUCTOR*/
-    public NeuralNetwork(double e,int nodes[],String fileI,String fileO,double Emax){  //Learning Constant,nodes in layers,Path of input file
+    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax){  //Learning Constant,nodes in layers,Path of input file
 
         //Initialising source of input data and target data
         INPUT_FILE=fileI;
         OUTPUT_FILE=fileO;
 
-        eta=e;
+        this.eta=eta;
         EMax=Emax;
         layer_count=nodes.length-1;
 

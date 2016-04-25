@@ -3,6 +3,7 @@ package AlgebraHelper;
 import jdk.nashorn.internal.objects.annotations.Getter;
 import jdk.nashorn.internal.objects.annotations.Setter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -14,7 +15,7 @@ import java.util.Random;
  * @author Jonathan Fidelis Paul
  * @since 1.0
  */
-public class Matrix{
+public class Matrix implements Serializable{
 
   //Data Members
     public enum Code{NORMAL,RANDOM}
