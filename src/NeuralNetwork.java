@@ -2,19 +2,15 @@ import AlgebraHelper.Matrix;
 
 import java.util.ArrayList;
 
+/* 4/22/2016 */
+
 /**
- * Created by Jonathan on 4/22/2016.
+ * Class to implement Neural Network
+ *
+ * @suthor Jonathan Fidelis Paul
+ * @since 1.0
  */
 public class NeuralNetwork {
-
-    /*
-    //ReadData
-    //Initialize Random Weights
-    //Train
-    //---FeedForward
-    //---BackPropagation
-    //Test
-    */
 
     /**DATA MEMBERS*/
     int layer_count;        //Keeps the count of layers i.e. weight matrices
@@ -32,10 +28,8 @@ public class NeuralNetwork {
     Matrix dataO;           //Matrix holding output training data
 
     /**CONSTRUCTOR*/
+    public NeuralNetwork(double e,int nodes[],String fileI,String fileO,double Emax){  //Learning Constant,nodes in layers,Path of input file
 
-    //Constructor initializes all required data structures
-    public NeuralNetwork(double e,int nodes[],String fileI,String fileO,double Emax)  //Learning Constant,nodes in layers,Path of input file
-    {
         //Initialising source of input data and target data
         INPUT_FILE=fileI;
         OUTPUT_FILE=fileO;
@@ -57,10 +51,8 @@ public class NeuralNetwork {
         Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
 
         //Initialising objects in arrays
-        for(int i=0;i<=layer_count;i++)
-        {
-            if(i>0)
-            {
+        for(int i=0;i<=layer_count;i++) {
+            if(i>0) {
                 Delta[i-1]=new Matrix(node_count[i],1);
                 NET[i-1]=new Matrix(node_count[i],1);
                 W[i-1]=new Matrix(node_count[i],node_count[i-1], Matrix.Code.RANDOM);   //Initialising weights of layers based on node count in each layer
@@ -76,20 +68,17 @@ public class NeuralNetwork {
 
     /**MEMBER METHODS*/
 
+    /**Functions and Derivatives*/
     //Activation function
-    private Double f(Double x)
-    {
+    private Double f(Double x) {
         return 1/(1+Math.exp(-x));
     }
 
     //Activation function for Matrix input
-    private Matrix f(Matrix x)
-    {
+    private Matrix f(Matrix x) {
         Matrix n=new Matrix(x);
-        for(int i=0;i<x.length();i++)
-        {
-            for(int j=0;j<x.width();j++)
-            {
+        for(int i=0;i<x.length();i++) {
+            for(int j=0;j<x.width();j++) {
                // n.mat[i][j]=f(n.mat[i][j]);
                 n.set(i,j,f(n.get(i,j)));
             }
@@ -98,19 +87,15 @@ public class NeuralNetwork {
     }
 
     //Method for function derivative
-    private Double fDash(Double x)
-    {
+    private Double fDash(Double x) {
         return f(x)*(1-f(x));
     }
 
     //Method for function derivative with Matrix input
-    private Matrix fDash(Matrix x)
-    {
+    private Matrix fDash(Matrix x) {
         Matrix n=new Matrix(x);
-        for(int i=0;i<x.length();i++)
-        {
-            for(int j=0;j<x.width();j++)
-            {
+        for(int i=0;i<x.length();i++) {
+            for(int j=0;j<x.width();j++) {
                 // n.mat[i][j]=fDash(n.mat[i][j]);
                 n.set(i,j,fDash(n.get(i,j)));
             }
@@ -118,6 +103,7 @@ public class NeuralNetwork {
         return n;
     }
 
+    /**Neural Network methods*/
     //Method to perform forward pass
     private Matrix feedForward() {
         for(int i=0;i<layer_count;i++) {
@@ -128,20 +114,17 @@ public class NeuralNetwork {
     }
 
     //Method to set delta values (signal errors)
-    private void setDelta(int index)
-    {
+    private void setDelta(int index) {
         //NOTE: Refer pages 185 and 179 of Artificial Neural Networks by Jacek M Zurada
-        if(index==layer_count-1)        //for output layer
-        {
-            Delta[index].set(
+        if(index==layer_count-1){        //for output layer
+                Delta[index].set(
                     D.subtract(Y[index+1])
                             .scalarMultiply(fDash(NET[index]))
                             .get()
             );  //(D-Y)*(1-Y)*Y
         }
-        else                            //for hidden layers
-        {
-            Delta[index].set(
+        else{                            //for hidden layers
+                Delta[index].set(
                     W[index+1].transpose()
                     .multiply(Delta[index+1])
                     .scalarMultiply(fDash(NET[index]))
@@ -152,8 +135,7 @@ public class NeuralNetwork {
 
     //This method makes necessary changes to reduce the error in the weights (using direction of maximum gradient)
     private void backPropagate() {
-        for(int i=layer_count-1;i>=0;i--)
-        {
+        for(int i=layer_count-1;i>=0;i--) {
             // NOTE: Refer page 184 of Artificial Neural Networks by Jacek M Zurada//
             setDelta(i);
             W[i]=W[i].add(Delta[i].multiply(Y[i].transpose()).multiply(eta));       /*  W.i=W.i+eta*Delta.i*Y'.i (Y transpose) */
@@ -193,7 +175,13 @@ public class NeuralNetwork {
 
     //Method to perform feed forward pass based on the input given
     public void predict(Double[]input) {
-        Y[0].set(input);
+        int len=input.length;
+        Double[]inp=new Double[len+1];
+        for(int i=0;i<len;i++) {
+            inp[i]=input[i];
+        }
+        inp[len]=1.0;
+        Y[0].set(inp);
         Matrix out=feedForward();
         showResult(out);
     }
@@ -218,17 +206,29 @@ public class NeuralNetwork {
         }
     }
 
+    //Method to display Failure of Convergence to Desired error
     private void showTerminationMessage(){
         System.out.println("\n-------XXXXXX Not Trained Completely XXXXX--------");
     }
 
+    //Method to display neural net structural details
+    private void networkDetails() {
+        System.out.println("--- Details of the Network Structure ---");
+        System.out.print("> Neuron Layer Count : [");
+        for(int i=0;i<node_count.length;i++) {
+            System.out.print(node_count[i]+",");
+        }
+        System.out.println("]");
+        System.out.println("> Learning Rate : "+eta);
+        System.out.println("> Max Error : "+EMax);
+    }
+
     /**MAIN METHOD*/
-    public static void main(String[]args)
-    {
+    public static void main(String[]args) {
         String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
         String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
         NeuralNetwork NN=new NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
         NN.train(10000);
-        NN.predict(new Double[]{0.65,0.49,1.0});
+        NN.predict(new Double[]{0.65,0.49});
     }
 }
