@@ -8,8 +8,8 @@ import java.util.ArrayList;
 public class NeuralNetwork {
 
     /*
-    //ReadData -/
-    //Initialize Random Weights -/
+    //ReadData
+    //Initialize Random Weights
     //Train
     //---FeedForward
     //---BackPropagation
@@ -23,13 +23,13 @@ public class NeuralNetwork {
     Matrix[] Y;             //Output value of each layer + Input data (Loaded from File)    [nodes stored column-wise]
     Matrix D;               //Desired Output of last layer (Loaded from File)
     Matrix[] NET;           //Net values (W*Y) of each layer's output
-    Matrix[] Delta;
+    Matrix[] Delta;         //Array of Matrix objects for Error signal at each layer
     Double eta;             //Learning Rate
-    Double EMax;
+    Double EMax;            //Max error allowed
     String INPUT_FILE;      //Holds path of file for Training data
-    String OUTPUT_FILE;      //Holds path of file for Desired-output data
-    Matrix dataI;
-    Matrix dataO;
+    String OUTPUT_FILE;     //Holds path of file for Desired-output data
+    Matrix dataI;           //Matrix holding input training data
+    Matrix dataO;           //Matrix holding output training data
 
     /**CONSTRUCTOR*/
 
@@ -57,7 +57,7 @@ public class NeuralNetwork {
         Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
 
         //Initialising objects in arrays
-        for(int i=0;i<layer_count+1;i++)
+        for(int i=0;i<=layer_count;i++)
         {
             if(i>0)
             {
@@ -68,8 +68,10 @@ public class NeuralNetwork {
 
             Y[i]=new Matrix(node_count[i],1);
             if(i<layer_count)                      //Bias not required for output layer
-                Y[i].set(node_count[i]-1,1,1.0);   //setting fixed input to +1 (for bias)
+                Y[i].set(node_count[i]-1,0,1.0);   //setting fixed input to +1 (for bias)
         }
+
+        readData();
     }
 
     /**MEMBER METHODS*/
@@ -117,10 +119,8 @@ public class NeuralNetwork {
     }
 
     //Method to perform forward pass
-    private Matrix feedForward()
-    {
-        for(int i=0;i<layer_count;i++)
-        {
+    private Matrix feedForward() {
+        for(int i=0;i<layer_count;i++) {
             NET[i]=W[i].multiply(Y[i]);
             Y[i+1]=f(NET[i]);
         }
@@ -133,11 +133,20 @@ public class NeuralNetwork {
         //NOTE: Refer pages 185 and 179 of Artificial Neural Networks by Jacek M Zurada
         if(index==layer_count-1)        //for output layer
         {
-            Delta[index].set(  D.subtract(Y[index+1]).multiply(fDash(NET[index+1])).get()  );      //(D-Y)*(1-Y)*Y
+            Delta[index].set(
+                    D.subtract(Y[index+1])
+                            .scalarMultiply(fDash(NET[index]))
+                            .get()
+            );  //(D-Y)*(1-Y)*Y
         }
         else                            //for hidden layers
         {
-            Delta[index].set(  W[index].transpose().multiply(Delta[index+1]).scalarMultiply(fDash(NET[index])).get()  );
+            Delta[index].set(
+                    W[index+1].transpose()
+                    .multiply(Delta[index+1])
+                    .scalarMultiply(fDash(NET[index]))
+                    .get()
+            );
         }
     }
 
@@ -168,11 +177,11 @@ public class NeuralNetwork {
             for(int j=0;j<dataI.length();j++) {
                 Y[0]=new Matrix(dataI.getRow(j).transpose());
                 D=new Matrix(dataO.getRow(j).transpose());
-
                 feedForward();
                 ETotal+=calculateError();
                 backPropagate();
             }
+            System.out.println("Error : "+ETotal);
             if(ETotal<EMax){
                 tr=true;
                 break;
@@ -183,28 +192,28 @@ public class NeuralNetwork {
     }
 
     //Method to perform feed forward pass based on the input given
-    public void predict(Double[]input)
-    {
+    public void predict(Double[]input) {
         Y[0].set(input);
         Matrix out=feedForward();
         showResult(out);
     }
 
     //Method to read input and target data
-    public void readData()
-    {
+    public void readData() {
         SVReader reader=new SVReader(",");
-        ArrayList<Double[]> list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE);
         dataI=new Matrix(Matrix.listTo2D(list));
-        list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA");
+        dataI.appendColumn(1.0);
+        list=reader.read(OUTPUT_FILE);
         dataO=new Matrix(Matrix.listTo2D(list));
+        //dataO.show();
     }
 
+    /**Display Methods*/
+
     //Method to display the result on the console
-    private void showResult(Matrix res)
-    {
-        for(int i=0;i<res.length();i++)
-        {
+    private void showResult(Matrix res) {
+        for(int i=0;i<res.length();i++) {
             System.out.println("Out "+(i+1)+" : "+res.get(i,0));
         }
     }
@@ -212,8 +221,14 @@ public class NeuralNetwork {
     private void showTerminationMessage(){
         System.out.println("\n-------XXXXXX Not Trained Completely XXXXX--------");
     }
+
+    /**MAIN METHOD*/
     public static void main(String[]args)
     {
-
+        String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
+        String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
+        NeuralNetwork NN=new NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
+        NN.train(10000);
+        NN.predict(new Double[]{0.65,0.49,1.0});
     }
 }

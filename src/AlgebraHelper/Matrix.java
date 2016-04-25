@@ -132,6 +132,25 @@ public class Matrix{
         }
     }
 
+    @Setter
+    //Method to add a new column to matrix with given value
+    public void appendColumn(Double d)
+    {
+        dimension[1]+=1;
+        Double[][]temp=mat;
+        mat=new Double[dimension[0]][dimension[1]];
+        for(int i=0;i<dimension[0];i++)
+        {
+            for(int j=0;j<dimension[1];j++)
+            {
+                if(j==dimension[1]-1)
+                    mat[i][j]=1.0;
+                else
+                    mat[i][j]=temp[i][j];
+            }
+        }
+    }
+
     @Getter
     //Method to get value at an index in Matrix
     public Double get(int row,int col)
@@ -181,7 +200,7 @@ public class Matrix{
     public Matrix getRow(int row) {
         Matrix m=new Matrix(1,dimension[1]);
         for(int i=0;i<dimension[1];i++) {
-            m.mat[row][i]=mat[row][i];
+            m.mat[0][i]=mat[row][i];
         }
         return m;
     }
@@ -425,9 +444,9 @@ public class Matrix{
     /**MAIN METHOD*/
     public static void main(String[]args)
     {
-        Matrix m=new Matrix(2,3);
-        m.set(new Double[][]{{2.0, 3.0,4.0},{2.0, 3.0,5.0}});
-        m.transpose().show();
+        //Matrix m=new Matrix(2,3);
+        //m.set(new Double[][]{{2.0, 3.0,4.0},{2.0, 3.0,5.0}});
+        //m.transpose().show();
         /*Matrix m2=new Matrix(2,2);
         m2.set(new Double[][]{{1.0, 3.0}, {3.0, 2.0}});
         //m2.show();
