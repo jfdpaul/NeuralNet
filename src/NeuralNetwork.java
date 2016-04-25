@@ -7,38 +7,41 @@ import java.util.ArrayList;
  */
 public class NeuralNetwork {
 
+    /*
     //ReadData -/
     //Initialize Random Weights -/
     //Train
     //---FeedForward
     //---BackPropagation
     //Test
-
+    */
 
     /**DATA MEMBERS*/
     int layer_count;        //Keeps the count of layers i.e. weight matrices
     int node_count[];       //Holds the node count in each layer including the input layer
     Matrix[] W;             //Holds the weight matrix of each layer
     Matrix[] Y;             //Output value of each layer + Input data (Loaded from File)    [nodes stored column-wise]
-    Double[] D;             //Desired Output of last layer (Loaded from File)
+    Matrix D;               //Desired Output of last layer (Loaded from File)
     Matrix[] NET;           //Net values (W*Y) of each layer's output
     Matrix[] Delta;
     Double eta;             //Learning Rate
+    Double EMax;
     String INPUT_FILE;      //Holds path of file for Training data
     String OUTPUT_FILE;      //Holds path of file for Desired-output data
-    Double[][] dataI;
-    Double[][] dataO;
-    //delta and others are local variables
-    /**CONSTRUCTORS*/
+    Matrix dataI;
+    Matrix dataO;
+
+    /**CONSTRUCTOR*/
 
     //Constructor initializes all required data structures
-    public NeuralNetwork(double e,int nodes[],String fileI,String fileO)  //Learning Constant,nodes in layers,Path of input file
+    public NeuralNetwork(double e,int nodes[],String fileI,String fileO,double Emax)  //Learning Constant,nodes in layers,Path of input file
     {
         //Initialising source of input data and target data
         INPUT_FILE=fileI;
         OUTPUT_FILE=fileO;
 
         eta=e;
+        EMax=Emax;
         layer_count=nodes.length-1;
 
         node_count=nodes;
@@ -46,7 +49,7 @@ public class NeuralNetwork {
         for(int i=0;i<layer_count;i++)
             node_count[i]=node_count[i]+1;
 
-        D=new Double[node_count[layer_count]];  //Desired value vector for output (last) layer
+        D=new Matrix(node_count[layer_count],1);  //Desired value vector for output (last) layer
 
         W=new Matrix[layer_count];              //Holds the weight matrix of each layer
         Delta=new Matrix[layer_count];
@@ -64,7 +67,7 @@ public class NeuralNetwork {
             }
 
             Y[i]=new Matrix(node_count[i],1);
-            if(i<layer_count)                       //Not required for output layer
+            if(i<layer_count)                      //Bias not required for output layer
                 Y[i].set(node_count[i]-1,1,1.0);   //setting fixed input to +1 (for bias)
         }
     }
@@ -77,12 +80,13 @@ public class NeuralNetwork {
         return 1/(1+Math.exp(-x));
     }
 
+    //Activation function for Matrix input
     private Matrix f(Matrix x)
     {
         Matrix n=new Matrix(x);
-        for(int i=0;i<x.dimension[0];i++)
+        for(int i=0;i<x.length();i++)
         {
-            for(int j=0;j<x.dimension[1];j++)
+            for(int j=0;j<x.width();j++)
             {
                // n.mat[i][j]=f(n.mat[i][j]);
                 n.set(i,j,f(n.get(i,j)));
@@ -91,6 +95,28 @@ public class NeuralNetwork {
         return n;
     }
 
+    //Method for function derivative
+    private Double fDash(Double x)
+    {
+        return f(x)*(1-f(x));
+    }
+
+    //Method for function derivative with Matrix input
+    private Matrix fDash(Matrix x)
+    {
+        Matrix n=new Matrix(x);
+        for(int i=0;i<x.length();i++)
+        {
+            for(int j=0;j<x.width();j++)
+            {
+                // n.mat[i][j]=fDash(n.mat[i][j]);
+                n.set(i,j,fDash(n.get(i,j)));
+            }
+        }
+        return n;
+    }
+
+    //Method to perform forward pass
     private Matrix feedForward()
     {
         for(int i=0;i<layer_count;i++)
@@ -101,40 +127,93 @@ public class NeuralNetwork {
         return Y[layer_count];        //return result of output layer
     }
 
-    /*
-    private Double calculateError()
+    //Method to set delta values (signal errors)
+    private void setDelta(int index)
     {
-
-    }*/
+        //NOTE: Refer pages 185 and 179 of Artificial Neural Networks by Jacek M Zurada
+        if(index==layer_count-1)        //for output layer
+        {
+            Delta[index].set(  D.subtract(Y[index+1]).multiply(fDash(NET[index+1])).get()  );      //(D-Y)*(1-Y)*Y
+        }
+        else                            //for hidden layers
+        {
+            Delta[index].set(  W[index].transpose().multiply(Delta[index+1]).scalarMultiply(fDash(NET[index])).get()  );
+        }
+    }
 
     //This method makes necessary changes to reduce the error in the weights (using direction of maximum gradient)
-    private void backPropagate()
-    {
-        for(int i=0;i<layer_count;i++)
+    private void backPropagate() {
+        for(int i=layer_count-1;i>=0;i--)
         {
-            /*
-            for(int k=0;k<node_count[i+1];k++)
-            {
-                for(int j=0;j<node_count[i];j++)
-                {
-                    W[i].mat[k][j]=W[i].mat[k][j]+eta*delta[k]*Y[j];
-                }
-            }
-            */
-            /*OR*/
-            //refer page206 of Artificial Neural Networks by Jacek M Zurada
-            W[i]=W[i].add(Delta[i].multiply(Y[i]).multiply(eta));
+            // NOTE: Refer page 184 of Artificial Neural Networks by Jacek M Zurada//
+            setDelta(i);
+            W[i]=W[i].add(Delta[i].multiply(Y[i].transpose()).multiply(eta));       /*  W.i=W.i+eta*Delta.i*Y'.i (Y transpose) */
         }
+    }
+
+    //Method to calculate error in output
+    private Double calculateError() {
+        Double err=0.0;
+        for(int i=0;i<Y[layer_count].length();i++) {
+            err+=0.5*Math.pow(D.get(i,0)-Y[layer_count].get(i,0),2);
+        }
+        return err;
+    }
+
+    //Method to train the network for 'epoch' times for all training data
+    public void train(int maxEpoch) {
+        boolean tr=false;
+        for(int i=0;i<maxEpoch;i++) {
+            double ETotal=0.0;
+            for(int j=0;j<dataI.length();j++) {
+                Y[0]=new Matrix(dataI.getRow(j).transpose());
+                D=new Matrix(dataO.getRow(j).transpose());
+
+                feedForward();
+                ETotal+=calculateError();
+                backPropagate();
+            }
+            if(ETotal<EMax){
+                tr=true;
+                break;
+            }
+        }
+        if(!tr)
+            showTerminationMessage();
+    }
+
+    //Method to perform feed forward pass based on the input given
+    public void predict(Double[]input)
+    {
+        Y[0].set(input);
+        Matrix out=feedForward();
+        showResult(out);
     }
 
     //Method to read input and target data
     public void readData()
     {
         SVReader reader=new SVReader(",");
-        ArrayList<Double[]> list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA.txt");
-        dataI=Matrix.listTo2D(list);
-        list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA.txt");
-        dataO=Matrix.listTo2D(list);
+        ArrayList<Double[]> list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA");
+        dataI=new Matrix(Matrix.listTo2D(list));
+        list=reader.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA");
+        dataO=new Matrix(Matrix.listTo2D(list));
     }
 
+    //Method to display the result on the console
+    private void showResult(Matrix res)
+    {
+        for(int i=0;i<res.length();i++)
+        {
+            System.out.println("Out "+(i+1)+" : "+res.get(i,0));
+        }
+    }
+
+    private void showTerminationMessage(){
+        System.out.println("\n-------XXXXXX Not Trained Completely XXXXX--------");
+    }
+    public static void main(String[]args)
+    {
+
+    }
 }
