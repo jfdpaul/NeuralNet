@@ -1,5 +1,6 @@
 import AlgebraHelper.Matrix;
 
+import javax.swing.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -33,6 +34,11 @@ public class NeuralNetwork implements Serializable{
     String OUTPUT_FILE;     //Holds path of file for Desired-output data
     Matrix dataI;           //Matrix holding input training data
     Matrix dataO;           //Matrix holding output training data
+
+    /*GUI MEMBERS*/
+    transient static JFrame f;
+    transient static JTextArea ta;
+    transient static JScrollPane sp;
 
     /**
      * CONSTRUCTOR
@@ -73,6 +79,9 @@ public class NeuralNetwork implements Serializable{
         }
 
         readData();
+
+        createConsole();
+
     }
 
     /*MEMBER METHODS*/
@@ -206,7 +215,7 @@ public class NeuralNetwork implements Serializable{
                 ETotal+=calculateError();
                 backPropagate();
             }
-            System.out.println("Error : "+ETotal);
+            toDisplay("\nError : "+ETotal);
             if(ETotal<EMax){
                 tr=true;
                 break;
@@ -249,13 +258,24 @@ public class NeuralNetwork implements Serializable{
 
     /*Display Methods*/
 
+    /**
+     * Method to display result in GUI
+     * */
+    private void toDisplay(String msg) {
+        if(f==null)
+            createConsole();
+        System.out.println(msg);
+        ta.append(msg);
+    }
+
     /**Method to display the result on the console
      *
      * @return void
      * */
     private void showResult(Matrix res) {
+        toDisplay("\n");
         for(int i=0;i<res.length();i++) {
-            System.out.println("Out "+(i+1)+" : "+res.get(i,0));
+            toDisplay("\nOut "+(i+1)+" : "+res.get(i,0));
         }
     }
 
@@ -264,7 +284,7 @@ public class NeuralNetwork implements Serializable{
      * @return void
      * */
     private void showTerminationMessage(){
-        System.out.println("\n-------XXXXXX Not Trained Completely XXXXX--------");
+        toDisplay("\n-------XXXXXX Not Trained Completely XXXXX--------");
     }
 
     /**
@@ -273,16 +293,28 @@ public class NeuralNetwork implements Serializable{
      * @return void
      * */
     private void networkDetails() {
-        System.out.println("--- Details of the Network Structure ---");
-        System.out.print("> Neuron Layer Count : [");
+        toDisplay("--- Details of the Network Structure ---\n");
+        toDisplay("> Neuron Layer Count : [");
         for(int i=0;i<node_count.length;i++) {
-            System.out.print(node_count[i]+",");
+            toDisplay(node_count[i]+",");
         }
-        System.out.println("]");
-        System.out.println("> Learning Rate : "+eta);
-        System.out.println("> Max Error : "+EMax);
+        toDisplay("]\n");
+        toDisplay("> Learning Rate : "+eta+"\n");
+        toDisplay("> Max Error : "+EMax+"\n");
     }
 
+    private void createConsole(){
+
+        f=new JFrame("Console");
+        f.setSize(500,500);
+        f.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+        f.setVisible(true);
+
+        ta=new JTextArea();
+        ta.setAutoscrolls(true);
+        sp=new JScrollPane(ta);
+        f.add(sp);
+    }
     /*MAIN METHOD*/
     public static void main(String[]args) {
         String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";

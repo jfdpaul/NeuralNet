@@ -165,6 +165,7 @@ public class NeuralNetworkApplication {
                 new Thread(()->{
                         int epoch=Integer.parseInt(JOptionPane.showInputDialog(null,"Epoch : ","10000"));
                         nn[0].train(epoch);
+                        JOptionPane.showMessageDialog(null,"Training Complete");
                 }).start();
             }
         });
@@ -180,8 +181,10 @@ public class NeuralNetworkApplication {
                 }
                 if(nn[0]!=null)
                     nn[0].predict(dd);
-                else
+                else{
                     System.out.println("Neural Network Not Created");
+                    JOptionPane.showMessageDialog(null,"Neural Network Not Created");
+                }
             }
         });
 
@@ -189,12 +192,14 @@ public class NeuralNetworkApplication {
         save.addActionListener(ae->{
             saveNetwork();
             System.out.println("Data Saved");
+            JOptionPane.showMessageDialog(null,"Data Saved");
         });
 
         load=new JButton("Load");
         load.addActionListener(ae->{
             loadNetwork();
             System.out.println("Data Loaded");
+            JOptionPane.showMessageDialog(null,"Data Loaded");
         });
 
         f.add(train);
