@@ -23,7 +23,7 @@ public class NeuralNetworkApplication {
      * */
     final NeuralNetwork[] nn={null};
     JButton predict,train,save,load;
-    JTextArea etaText,errText,countText,inText,outText,predictText;
+    JTextArea etaText,errText,countText,inText,outText,rowCountText,columnsText,predictText;
     String input;
     String output;
 
@@ -118,10 +118,10 @@ public class NeuralNetworkApplication {
 
         JFrame f=new JFrame("Neural Network");
         f.setVisible(true);
-        f.setSize(800,300);
+        f.setSize(800,350);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        f.setLayout(new GridLayout(8,2,2,2));
+        f.setLayout(new GridLayout(10,2,2,2));
 
         JLabel jl=new JLabel("Eta");
         etaText=new JTextArea("0.6");
@@ -135,6 +135,14 @@ public class NeuralNetworkApplication {
         countText=new JTextArea("2,3,2");
         f.add(jl);
         f.add(countText);
+        jl=new JLabel("Row Count");
+        rowCountText=new JTextArea("");
+        f.add(jl);
+        f.add(rowCountText);
+        jl=new JLabel("Columns");
+        columnsText=new JTextArea("0,1,2,3,4");
+        f.add(jl);
+        f.add(columnsText);
         jl=new JLabel("Input Data File");
         inText=new JTextArea(input);
         f.add(jl);
@@ -152,6 +160,7 @@ public class NeuralNetworkApplication {
             if(isTrainingFieldsFilled()){
 
                 double eta = Double.parseDouble(etaText.getText());
+
                 String nodes=countText.getText();
                 String[] v = nodes.split(",");
                 int[] d = new int[v.length];
@@ -160,7 +169,30 @@ public class NeuralNetworkApplication {
                 }
 
                 double err=Double.parseDouble(errText.getText());
-                nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err);
+                int rows=0;
+                String sRows=rowCountText.getText();
+                if(!sRows.equals(""))
+                    rows=Integer.parseInt(sRows);
+
+                int[] columns=null;
+                String sColumns=columnsText.getText();
+                if(!sColumns.equals("")){
+                    v = sColumns.split(",");
+                    columns = new int[v.length];
+                    for (int i = 0; i < v.length; i++) {
+                        columns[i] = Integer.parseInt(v[i]);
+                    }
+                }
+
+                if(rows==0&&columns==null)
+                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err);
+                else if(columns!=null&&rows>0)
+                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,rows,columns);
+                else if(rows>0&&columns==null)
+                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,rows);
+                else
+                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,columns);
+
 
                 new Thread(()->{
                         int epoch=Integer.parseInt(JOptionPane.showInputDialog(null,"Epoch : ","10000"));

@@ -54,6 +54,7 @@ public class NeuralNetwork implements Serializable{
         layer_count=nodes.length-1;
 
         node_count=nodes;
+
         //Adjustment for bias input (not required for output layer)
         for(int i=0;i<layer_count;i++)
             node_count[i]=node_count[i]+1;
@@ -79,9 +80,124 @@ public class NeuralNetwork implements Serializable{
         }
 
         readData();
-
         createConsole();
+    }
+    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int[]columns){
+        //Learning Constant,nodes in layers,Path of input file
 
+        INPUT_FILE=fileI;       //Initialising source of input data and target data
+        OUTPUT_FILE=fileO;
+
+        this.eta=eta;
+        EMax=Emax;
+        layer_count=nodes.length-1;
+
+        node_count=nodes;
+
+        //Adjustment for bias input (not required for output layer)
+        for(int i=0;i<layer_count;i++)
+            node_count[i]=node_count[i]+1;
+
+        D=new Matrix(node_count[layer_count],1);  //Desired value vector for output (last) layer
+
+        W=new Matrix[layer_count];              //Holds the weight matrix of each layer
+        Delta=new Matrix[layer_count];
+        NET=new Matrix[layer_count];            //Holds net value of each layer
+        Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
+
+        //Initialising objects in arrays
+        for(int i=0;i<=layer_count;i++) {
+            if(i>0) {
+                Delta[i-1]=new Matrix(node_count[i],1);
+                NET[i-1]=new Matrix(node_count[i],1);
+                W[i-1]=new Matrix(node_count[i],node_count[i-1], Matrix.Code.RANDOM);   //Initialising weights of layers based on node count in each layer
+            }
+
+            Y[i]=new Matrix(node_count[i],1);
+            if(i<layer_count)                      //Bias not required for output layer
+                Y[i].set(node_count[i]-1,0,1.0);   //setting fixed input to +1 (for bias)
+        }
+
+        readData(columns);
+        createConsole();
+    }
+    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int rows){
+        //Learning Constant,nodes in layers,Path of input file
+
+        INPUT_FILE=fileI;       //Initialising source of input data and target data
+        OUTPUT_FILE=fileO;
+
+        this.eta=eta;
+        EMax=Emax;
+        layer_count=nodes.length-1;
+
+        node_count=nodes;
+
+        //Adjustment for bias input (not required for output layer)
+        for(int i=0;i<layer_count;i++)
+            node_count[i]=node_count[i]+1;
+
+        D=new Matrix(node_count[layer_count],1);  //Desired value vector for output (last) layer
+
+        W=new Matrix[layer_count];              //Holds the weight matrix of each layer
+        Delta=new Matrix[layer_count];
+        NET=new Matrix[layer_count];            //Holds net value of each layer
+        Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
+
+        //Initialising objects in arrays
+        for(int i=0;i<=layer_count;i++) {
+            if(i>0) {
+                Delta[i-1]=new Matrix(node_count[i],1);
+                NET[i-1]=new Matrix(node_count[i],1);
+                W[i-1]=new Matrix(node_count[i],node_count[i-1], Matrix.Code.RANDOM);   //Initialising weights of layers based on node count in each layer
+            }
+
+            Y[i]=new Matrix(node_count[i],1);
+            if(i<layer_count)                      //Bias not required for output layer
+                Y[i].set(node_count[i]-1,0,1.0);   //setting fixed input to +1 (for bias)
+        }
+
+        readData(rows);
+        createConsole();
+    }
+    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int rows,int[]columns){
+        //Learning Constant,nodes in layers,Path of input file
+
+        INPUT_FILE=fileI;       //Initialising source of input data and target data
+        OUTPUT_FILE=fileO;
+
+        this.eta=eta;
+        EMax=Emax;
+        layer_count=nodes.length-1;
+
+        node_count=nodes;
+
+        //Adjustment for bias input (not required for output layer)
+        for(int i=0;i<layer_count;i++)
+            node_count[i]=node_count[i]+1;
+
+        D=new Matrix(node_count[layer_count],1);  //Desired value vector for output (last) layer
+
+        W=new Matrix[layer_count];              //Holds the weight matrix of each layer
+        Delta=new Matrix[layer_count];
+        NET=new Matrix[layer_count];            //Holds net value of each layer
+        Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
+
+        //Initialising objects in arrays
+        for(int i=0;i<=layer_count;i++) {
+            if(i>0) {
+                Delta[i-1]=new Matrix(node_count[i],1);
+                NET[i-1]=new Matrix(node_count[i],1);
+                W[i-1]=new Matrix(node_count[i],node_count[i-1], Matrix.Code.RANDOM);   //Initialising weights of layers based on node count in each layer
+            }
+
+            Y[i]=new Matrix(node_count[i],1);
+            if(i<layer_count)                      //Bias not required for output layer
+                Y[i].set(node_count[i]-1,0,1.0);   //setting fixed input to +1 (for bias)
+        }
+
+        readData(rows,columns);
+        createConsole();
     }
 
     /*MEMBER METHODS*/
@@ -253,7 +369,43 @@ public class NeuralNetwork implements Serializable{
         dataI.appendColumn(1.0);
         list=reader.read(OUTPUT_FILE);
         dataO=new Matrix(Matrix.listTo2D(list));
-        //dataO.show();
+    }
+    /**
+     * Method to read input and target data
+     * @return void
+     * */
+    public void readData(int rows) {
+        SVReader reader=new SVReader(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        dataI=new Matrix(Matrix.listTo2D(list));
+        dataI.appendColumn(1.0);
+        list=reader.read(OUTPUT_FILE,rows);
+        dataO=new Matrix(Matrix.listTo2D(list));
+    }
+    /**
+     * Method to read input and target data
+     * @return void
+     * */
+    public void readData(int[]columns) {
+        SVReader reader=new SVReader(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        dataI=new Matrix(Matrix.listTo2D(list));
+        dataI.appendColumn(1.0);
+        list=reader.read(OUTPUT_FILE,columns);
+        dataO=new Matrix(Matrix.listTo2D(list));
+    }
+
+    /**
+     * Method to read input and target data
+     * @return void
+     * */
+    public void readData(int rows,int[]columns) {
+        SVReader reader=new SVReader(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        dataI=new Matrix(Matrix.listTo2D(list));
+        dataI.appendColumn(1.0);
+        list=reader.read(OUTPUT_FILE,rows,columns);
+        dataO=new Matrix(Matrix.listTo2D(list));
     }
 
     /*Display Methods*/
@@ -315,12 +467,12 @@ public class NeuralNetwork implements Serializable{
         sp=new JScrollPane(ta);
         f.add(sp);
     }
-    /*MAIN METHOD*/
+    /*MAIN METHOD
     public static void main(String[]args) {
         String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
         String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
         NeuralNetwork NN=new NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
         NN.train(10000);
         NN.predict(new Double[]{0.65,0.49});
-    }
+    }*/
 }
