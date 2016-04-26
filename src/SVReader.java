@@ -1,9 +1,19 @@
 import java.io.*;
 import java.util.ArrayList;
 
-/**
+/*
  * Created by Jonathan Fidelis Paul on 1/8/2016.
  */
+
+/**
+ * Class to read any vectored data list
+ *
+ * <p>
+ *     Given a delimiter, this class can retrieve data separated by commas, blank space, etc.
+ * </p>
+ *
+ * @author Jonathan Fidelis Paul
+ * */
 public class SVReader {
 
     BufferedReader br;
@@ -15,9 +25,10 @@ public class SVReader {
         dlim=dlm;
     }
 
-    //Returns a List of Double Array
-    public ArrayList<Double[]> read(String path)
-    {
+    /**
+     * Returns a List of Double Array
+     * */
+    public ArrayList<Double[]> read(String path) {
         String s;
         ArrayList<Double[]> listD=new ArrayList<>();
         /*Loading the values from file*/
@@ -36,11 +47,5 @@ public class SVReader {
             e.printStackTrace();
         }
         return listD;
-    }
-    public static void main(String[]args)
-    {
-        //SVReader ss=new SVReader(",");
-        //List l=ss.read("C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\InputData.txt");
-
     }
 }

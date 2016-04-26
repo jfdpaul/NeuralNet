@@ -34,11 +34,13 @@ public class NeuralNetwork implements Serializable{
     Matrix dataI;           //Matrix holding input training data
     Matrix dataO;           //Matrix holding output training data
 
-    /**CONSTRUCTOR*/
-    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax){  //Learning Constant,nodes in layers,Path of input file
+    /**
+     * CONSTRUCTOR
+     * */
+    public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax){
+        //Learning Constant,nodes in layers,Path of input file
 
-        //Initialising source of input data and target data
-        INPUT_FILE=fileI;
+        INPUT_FILE=fileI;       //Initialising source of input data and target data
         OUTPUT_FILE=fileO;
 
         this.eta=eta;
@@ -73,15 +75,22 @@ public class NeuralNetwork implements Serializable{
         readData();
     }
 
-    /**MEMBER METHODS*/
+    /*MEMBER METHODS*/
 
-    /**Functions and Derivatives*/
-    //Activation function
+    /*Functions and Derivatives*/
+    /**Activation function
+     *
+     * @return Double
+     * */
     private Double f(Double x) {
         return 1/(1+Math.exp(-x));
     }
 
-    //Activation function for Matrix input
+    /**
+     * Activation function for Matrix input
+     * @return Matrix
+     * @see Matrix
+     * */
     private Matrix f(Matrix x) {
         Matrix n=new Matrix(x);
         for(int i=0;i<x.length();i++) {
@@ -93,12 +102,20 @@ public class NeuralNetwork implements Serializable{
         return n;
     }
 
-    //Method for function derivative
+    /**
+     * Method for function derivative
+     * @return Double
+     * */
     private Double fDash(Double x) {
         return f(x)*(1-f(x));
     }
 
-    //Method for function derivative with Matrix input
+    /**
+     * Method for function derivative with Matrix input
+     *
+     * @return Matrix
+     * @see Matrix
+     * */
     private Matrix fDash(Matrix x) {
         Matrix n=new Matrix(x);
         for(int i=0;i<x.length();i++) {
@@ -110,8 +127,13 @@ public class NeuralNetwork implements Serializable{
         return n;
     }
 
-    /**Neural Network methods*/
-    //Method to perform forward pass
+    /*Neural Network methods*/
+    /**
+     * Method to perform forward pass
+     *
+     * @return Matrix
+     * @see Matrix
+     * */
     private Matrix feedForward() {
         for(int i=0;i<layer_count;i++) {
             NET[i]=W[i].multiply(Y[i]);
@@ -120,7 +142,10 @@ public class NeuralNetwork implements Serializable{
         return Y[layer_count];        //return result of output layer
     }
 
-    //Method to set delta values (signal errors)
+    /**
+     * Method to set delta values (signal errors)
+     * @return void
+     * */
     private void setDelta(int index) {
         //NOTE: Refer pages 185 and 179 of Artificial Neural Networks by Jacek M Zurada
         if(index==layer_count-1){        //for output layer
@@ -140,7 +165,10 @@ public class NeuralNetwork implements Serializable{
         }
     }
 
-    //This method makes necessary changes to reduce the error in the weights (using direction of maximum gradient)
+    /**
+     * This method makes necessary changes to reduce the error in the weights (using direction of maximum gradient)
+     * @return void
+     * */
     private void backPropagate() {
         for(int i=layer_count-1;i>=0;i--) {
             // NOTE: Refer page 184 of Artificial Neural Networks by Jacek M Zurada//
@@ -149,7 +177,11 @@ public class NeuralNetwork implements Serializable{
         }
     }
 
-    //Method to calculate error in output
+    /**
+     * Method to calculate error in output
+     *
+     * @return Double
+     * */
     private Double calculateError() {
         Double err=0.0;
         for(int i=0;i<Y[layer_count].length();i++) {
@@ -158,7 +190,11 @@ public class NeuralNetwork implements Serializable{
         return err;
     }
 
-    //Method to train the network for 'epoch' times for all training data
+    /**
+     * Method to train the network for 'epoch' times for all training data
+     *
+     * @return void
+     * */
     public void train(int maxEpoch) {
         boolean tr=false;
         for(int i=0;i<maxEpoch;i++) {
@@ -180,7 +216,11 @@ public class NeuralNetwork implements Serializable{
             showTerminationMessage();
     }
 
-    //Method to perform feed forward pass based on the input given
+    /**
+     * Method to perform feed forward pass based on the input given
+     *
+     * @return void
+     * */
     public void predict(Double[]input) {
         int len=input.length;
         Double[]inp=new Double[len+1];
@@ -193,7 +233,10 @@ public class NeuralNetwork implements Serializable{
         showResult(out);
     }
 
-    //Method to read input and target data
+    /**
+     * Method to read input and target data
+     * @return void
+     * */
     public void readData() {
         SVReader reader=new SVReader(",");
         ArrayList<Double[]> list=reader.read(INPUT_FILE);
@@ -204,21 +247,31 @@ public class NeuralNetwork implements Serializable{
         //dataO.show();
     }
 
-    /**Display Methods*/
+    /*Display Methods*/
 
-    //Method to display the result on the console
+    /**Method to display the result on the console
+     *
+     * @return void
+     * */
     private void showResult(Matrix res) {
         for(int i=0;i<res.length();i++) {
             System.out.println("Out "+(i+1)+" : "+res.get(i,0));
         }
     }
 
-    //Method to display Failure of Convergence to Desired error
+    /**Method to display Failure of Convergence to Desired error
+     *
+     * @return void
+     * */
     private void showTerminationMessage(){
         System.out.println("\n-------XXXXXX Not Trained Completely XXXXX--------");
     }
 
-    //Method to display neural net structural details
+    /**
+     * Method to display neural net structural details
+     *
+     * @return void
+     * */
     private void networkDetails() {
         System.out.println("--- Details of the Network Structure ---");
         System.out.print("> Neuron Layer Count : [");
@@ -230,7 +283,7 @@ public class NeuralNetwork implements Serializable{
         System.out.println("> Max Error : "+EMax);
     }
 
-    /**MAIN METHOD*/
+    /*MAIN METHOD*/
     public static void main(String[]args) {
         String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
         String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";

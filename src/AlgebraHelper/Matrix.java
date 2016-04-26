@@ -1,8 +1,5 @@
 package AlgebraHelper;
 
-import jdk.nashorn.internal.objects.annotations.Getter;
-import jdk.nashorn.internal.objects.annotations.Setter;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,12 +14,16 @@ import java.util.Random;
  */
 public class Matrix implements Serializable{
 
-  //Data Members
+    /**Data Members*/
     public enum Code{NORMAL,RANDOM}
-    private int[] dimension;    //Dimension Details [row,column,depth,etc...]
-    private Double[][]mat ;        //Fixed matrix with 2 dimensions
+    private int[] dimension;        //Dimension Details [row,column,depth,etc...]
+    private Double[][]mat ;         //Fixed matrix with 2 dimensions
 
-    //Inner class
+    /**
+     * Inner class for Exception Handling
+     *
+     * @see Throwable
+     * */
     private class DimensionMismatchException extends Throwable {
         public DimensionMismatchException(Matrix m,String msg) {
             System.out.println("*** ERROR OCCURRED ***");
@@ -76,10 +77,11 @@ public class Matrix implements Serializable{
         this(r,c,Code.NORMAL);
     }
 
-    /**MEMBER METHODS*/
+    /*MEMBER METHODS*/
 
-    @Setter
-    //Method to set value of matrix to this object
+    /**
+     * Method to set value of matrix to this object
+     * */
     public void set(Double[][]m) {
         if(m.length==dimension[0]&&m[0].length==dimension[1]) {
             for(int i=0;i<dimension[0];i++) {
@@ -93,8 +95,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    @Setter
-    //Method to set value of matrix to this object for 1D
+    /**
+     * Method to set value of matrix to this object for 1D
+     * */
     public void set(Double[]m) {
         if(m.length==dimension[0]&&dimension[1]==1) {
             for(int i=0;i<dimension[0];i++) {
@@ -106,8 +109,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    @Setter
-    //Method to set value at an index in Matrix
+    /**
+     * Method to set value at an index in Matrix
+     * */
     public void set(int row,int col,Double d) {
         if(row>=0&&row<dimension[0]&&col>=0&&col<dimension[1]) {
             mat[row][col]=d;
@@ -117,8 +121,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    @Setter
-    //Method to add a new column to matrix with given value
+    /**
+     * Method to add a new column to matrix with given value
+     * */
     public void appendColumn(Double d) {
         dimension[1]+=1;
         Double[][]temp=mat;
@@ -133,8 +138,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    @Getter
-    //Method to get value at an index in Matrix
+    /**
+     * Method to get value at an index in Matrix
+     * */
     public Double get(int row,int col) {
         if(row>=0&&row<dimension[0]&&col>=0&&col<dimension[1]) {
             return mat[row][col];
@@ -145,14 +151,16 @@ public class Matrix implements Serializable{
         return null;
     }
 
-    @Getter
-    //Method to get value of matrix in Matrix
+    /**
+     * Method to get value of matrix in Matrix
+     * */
     public Double[][] get() {
         return mat;
     }
 
-    @Getter
-    //Method to get copy of matrix
+    /**
+     * Method to get copy of matrix
+     * */
     public Double[][] getCopy() {
         Double[][]m=new Double[dimension[0]][dimension[1]];
         for(int i=0;i<dimension[0];i++) {
@@ -161,18 +169,27 @@ public class Matrix implements Serializable{
         return m;
     }
 
-    @Getter
+    /**
+     * Method to return row count in Matrix
+     *
+     * @return int
+    * */
     public int length() {
         return dimension[0];
     }
 
-    @Getter
+    /**
+     * Method to return column count in Matrix
+     *
+     * @return int
+     * */
     public int width() {
         return dimension[1];
     }
 
-    @Getter
-    //Method to return a row as a Matrix
+    /**
+     * Method to return a row as a Matrix
+     * */
     public Matrix getRow(int row) {
         Matrix m=new Matrix(1,dimension[1]);
         for(int i=0;i<dimension[1];i++) {
@@ -181,8 +198,9 @@ public class Matrix implements Serializable{
         return m;
     }
 
-    @Getter
-    //Method to return a row as a Matrix
+    /**
+     * Method to return a row as a Matrix
+     * */
     public Matrix getColumn(int col) {
         Matrix m=new Matrix(dimension[0],1);
         for(int i=0;i<dimension[0];i++) {
@@ -191,7 +209,9 @@ public class Matrix implements Serializable{
         return m;
     }
 
-    //Method to set matrix cells with default or random elements
+    /**
+     * Method to set matrix cells with default or random elements
+     * */
     private void setupMatrix(Code c) {
         mat = new Double[dimension[0]][dimension[1]];
 
@@ -206,7 +226,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    //Method to set matrix cells with values in input matrix
+    /**
+     * Method to set matrix cells with values in input matrix
+     * */
     private void setupMatrix(Double[][] mt) {
         mat = new Double[dimension[0]][dimension[1]];
 
@@ -218,7 +240,9 @@ public class Matrix implements Serializable{
         }
     }
 
-    //Method to set matrix cells with values in input matrix for 1D
+    /**
+     * Method to set matrix cells with values in input matrix for 1D
+     * */
     private void setupMatrix(Double[] mt) {
         mat = new Double[dimension[0]][dimension[1]];
 
@@ -228,7 +252,12 @@ public class Matrix implements Serializable{
         }
     }
 
-    //Method to Change arraylist to 2d matrix
+    /**
+     * Method to change ArrayList to 2d matrix
+     *
+     * @return Double[][]
+     * @see ArrayList
+     * */
     public static Double[][] listTo2D(ArrayList<Double[]> list) {
         int rows=list.size();
         int cols=list.get(0).length;
@@ -239,8 +268,11 @@ public class Matrix implements Serializable{
         return listD;
     }
 
-    /**Mathematical Operations */
-    //Method to multiply with a matrix
+    /*Mathematical Operations */
+
+    /**
+     * Method to multiply with a matrix
+     * */
     public Matrix multiply(Matrix m) {
         final Matrix[] n = {null};
 
@@ -264,7 +296,9 @@ public class Matrix implements Serializable{
         return n[0];
     }
 
-    //Method to multiply with a constant
+    /**
+     * Method to multiply with a constant
+     * */
     public Matrix multiply(Double c) {
         final Matrix[] n = {null};
         n[0] = new Matrix(this);
@@ -278,7 +312,9 @@ public class Matrix implements Serializable{
         return n[0];
     }
 
-    //Method to scalar multiply with a matrix
+    /**
+     * Method to scalar multiply with a matrix
+     * */
     public Matrix scalarMultiply(Matrix m) {
         final Matrix[] n = {null};
 
@@ -313,7 +349,9 @@ public class Matrix implements Serializable{
         return n[0];
     }
 
-    //Method to add with a matrix
+    /**
+     * Method to add with a matrix
+     * */
     public Matrix add(Matrix m) {
         final Matrix[] n = {null};
 
@@ -333,7 +371,9 @@ public class Matrix implements Serializable{
         return n[0];
     }
 
-    //Method to add with a matrix
+    /**
+     * Method to add with a matrix
+     * */
     public Matrix subtract(Matrix m) {
         final Matrix[] n = {null};
         if (dimension[1] == m.dimension[1]&&dimension[0]==m.dimension[0]) {
@@ -352,7 +392,9 @@ public class Matrix implements Serializable{
         return n[0];
     }
 
-    //Method to return transpose of matrix
+    /**
+     * Method to return transpose of matrix
+     * */
     public Matrix transpose() {
         Matrix n=new Matrix(dimension[1],dimension[0]);
         Double[][]m=this.getCopy();
@@ -364,8 +406,10 @@ public class Matrix implements Serializable{
         return n;
     }
 
-    /**Display Method*/
-    //Method to display matrix elements on CONSOLE
+    /*Display Method*/
+    /**
+     * Method to display matrix elements on CONSOLE
+     * */
     public void show() {
         for(int i=0;i<dimension[0];i++) {
             for(int j=0;j<dimension[1];j++) {

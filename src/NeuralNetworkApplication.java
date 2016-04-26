@@ -18,6 +18,9 @@ import java.util.Vector;
 public class NeuralNetworkApplication {
 
 
+    /**
+     * DATA MEMBERS
+     * */
     final NeuralNetwork[] nn={null};
     JButton predict,train,save,load;
     JTextArea etaText,errText,countText,inText,outText,predictText;
@@ -146,7 +149,7 @@ public class NeuralNetworkApplication {
         f.add(predictText);
         train=new JButton("Train");
         train.addActionListener(ae -> {
-            if(trainingFieldsFilled()){
+            if(isTrainingFieldsFilled()){
 
                 double eta = Double.parseDouble(etaText.getText());
                 String nodes=countText.getText();
@@ -200,6 +203,11 @@ public class NeuralNetworkApplication {
         f.add(load);
     }
 
+    /**
+     * Method to save object of present network structure
+     *
+     * @return void
+     * */
     private void saveNetwork() {
         try {
             FileOutputStream f_out = new FileOutputStream("neuralNet.data");
@@ -210,6 +218,12 @@ public class NeuralNetworkApplication {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Method to load object structure of recent saved network
+     *
+     * @return void
+     * */
     private void loadNetwork() {
         FileInputStream f_in = null;
         try {
@@ -228,7 +242,13 @@ public class NeuralNetworkApplication {
         }
 
     }
-    private boolean trainingFieldsFilled()
+
+    /**
+     * Method to check if fields are present to start neural network
+     *
+     * @return boolean
+     * */
+    private boolean isTrainingFieldsFilled()
     {
         if(etaText.getText().length()==0)
             return false;
