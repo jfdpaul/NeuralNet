@@ -2,10 +2,11 @@
  * Created by Jonathan Fidelis Paul on 4/25/2016.
  */
 
+import AiHelper.NeuralNetwork;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.*;
-import java.util.Vector;
 
 /**
  * Class to implement application to run Neural Network
@@ -16,7 +17,6 @@ import java.util.Vector;
  *
  * */
 public class NeuralNetworkApplication {
-
 
     /**
      * DATA MEMBERS
@@ -29,8 +29,10 @@ public class NeuralNetworkApplication {
 
     public NeuralNetworkApplication(int ch) {
 
-        input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
-        output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
+        //input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
+        //output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
+        input="C:\\Users\\SONY\\Desktop\\digits\\pendigits.csv";
+        output="C:\\Users\\SONY\\Desktop\\digits\\output2.csv";
         switch(ch){
             //Case for command user interface
             case 0:

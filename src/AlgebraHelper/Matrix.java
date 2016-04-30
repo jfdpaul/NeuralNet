@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 /* 4/22/2016*/
+
 /**
  * Class to provide matrix functionality
  *
@@ -313,6 +314,22 @@ public class Matrix implements Serializable{
     }
 
     /**
+     * Method to multiply with a constant
+     * */
+    public Matrix divide(Double c) {
+        final Matrix[] n = {null};
+        n[0] = new Matrix(this);
+
+        //Divide
+        for(int i=0;i<n[0].dimension[0];i++) {
+            for(int j=0;j<n[0].dimension[1];j++) {
+                n[0].mat[i][j]/=c;
+            }
+        }
+        return n[0];
+    }
+
+    /**
      * Method to scalar multiply with a matrix
      * */
     public Matrix scalarMultiply(Matrix m) {
@@ -336,6 +353,43 @@ public class Matrix implements Serializable{
                 for(int i=0;i<n[0].dimension[0];i++) {
                     for(int j=0;j<n[0].dimension[1];j++) {
                         n[0].mat[i][j]*=m.mat[i][0];
+                    }
+                }
+            }
+            else {
+                new DimensionMismatchException(m,"Scalar Multiplication Not Possible");
+            }
+        }
+        else {
+            new DimensionMismatchException(m,"Scalar Multiplication Not Possible");
+        }
+        return n[0];
+    }
+
+    /**
+     * Method to scalar multiply with a matrix
+     * */
+    public Matrix scalarDivide(Matrix m) {
+        final Matrix[] n = {null};
+
+        if (dimension[0]==m.dimension[0]&&(dimension[1]==1||m.dimension[1]==1)) {
+            if(dimension[1]==1) {
+                n[0] = new Matrix(m);
+
+                //Scalar Divide
+                for(int i=0;i<n[0].dimension[0];i++) {
+                    for(int j=0;j<n[0].dimension[1];j++) {
+                        n[0].mat[i][j]/=mat[i][0];
+                    }
+                }
+            }
+            else if(m.dimension[1]==1) {
+                n[0] = new Matrix(this);
+
+                //Scalar Divide
+                for(int i=0;i<n[0].dimension[0];i++) {
+                    for(int j=0;j<n[0].dimension[1];j++) {
+                        n[0].mat[i][j]/=m.mat[i][0];
                     }
                 }
             }

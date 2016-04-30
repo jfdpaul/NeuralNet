@@ -1,4 +1,7 @@
+package AiHelper;
+
 import AlgebraHelper.Matrix;
+import FileHelper.SeparatedVariables;
 
 import javax.swing.*;
 import java.io.Serializable;
@@ -82,6 +85,7 @@ public class NeuralNetwork implements Serializable{
         readData();
         createConsole();
     }
+
     public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int[]columns){
         //Learning Constant,nodes in layers,Path of input file
 
@@ -120,7 +124,9 @@ public class NeuralNetwork implements Serializable{
 
         readData(columns);
         createConsole();
+        networkDetails();
     }
+
     public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int rows){
         //Learning Constant,nodes in layers,Path of input file
 
@@ -160,6 +166,7 @@ public class NeuralNetwork implements Serializable{
         readData(rows);
         createConsole();
     }
+
     public NeuralNetwork(double eta,int nodes[],String fileI,String fileO,double Emax,int rows,int[]columns){
         //Learning Constant,nodes in layers,Path of input file
 
@@ -203,13 +210,19 @@ public class NeuralNetwork implements Serializable{
     /*MEMBER METHODS*/
 
     /*Functions and Derivatives*/
+
     /**Activation function
      *
      * @return Double
      * */
+
     private Double f(Double x) {
         return 1/(1+Math.exp(-x));
     }
+
+/*    private Double f(Double x) {
+        return 2/(1+Math.exp(-x)) -1;
+    }*/
 
     /**
      * Activation function for Matrix input
@@ -234,6 +247,11 @@ public class NeuralNetwork implements Serializable{
     private Double fDash(Double x) {
         return f(x)*(1-f(x));
     }
+
+/*
+    private Double fDash(Double x) {
+        return (1-Math.pow(f(x),2))/2;
+    }*/
 
     /**
      * Method for function derivative with Matrix input
@@ -322,10 +340,11 @@ public class NeuralNetwork implements Serializable{
      * */
     public void train(int maxEpoch) {
         boolean tr=false;
+        double prevErr=0;
         for(int i=0;i<maxEpoch;i++) {
             double ETotal=0.0;
             for(int j=0;j<dataI.length();j++) {
-                Y[0]=new Matrix(dataI.getRow(j).transpose());
+                Y[0]=new Matrix(dataI.getRow(j).transpose().divide(100.0));
                 D=new Matrix(dataO.getRow(j).transpose());
                 feedForward();
                 ETotal+=calculateError();
@@ -336,6 +355,10 @@ public class NeuralNetwork implements Serializable{
                 tr=true;
                 break;
             }
+            if(ETotal==prevErr)
+                break;
+            else
+                prevErr=ETotal;
         }
         if(!tr)
             showTerminationMessage();
@@ -363,32 +386,34 @@ public class NeuralNetwork implements Serializable{
      * @return void
      * */
     public void readData() {
-        SVReader reader=new SVReader(",");
+        SeparatedVariables reader=new SeparatedVariables(",");
         ArrayList<Double[]> list=reader.read(INPUT_FILE);
         dataI=new Matrix(Matrix.listTo2D(list));
         dataI.appendColumn(1.0);
         list=reader.read(OUTPUT_FILE);
         dataO=new Matrix(Matrix.listTo2D(list));
     }
+
     /**
      * Method to read input and target data
      * @return void
      * */
     public void readData(int rows) {
-        SVReader reader=new SVReader(",");
-        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        SeparatedVariables reader=new SeparatedVariables(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE,rows);
         dataI=new Matrix(Matrix.listTo2D(list));
         dataI.appendColumn(1.0);
         list=reader.read(OUTPUT_FILE,rows);
         dataO=new Matrix(Matrix.listTo2D(list));
     }
+
     /**
      * Method to read input and target data
      * @return void
      * */
     public void readData(int[]columns) {
-        SVReader reader=new SVReader(",");
-        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        SeparatedVariables reader=new SeparatedVariables(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE,columns);
         dataI=new Matrix(Matrix.listTo2D(list));
         dataI.appendColumn(1.0);
         list=reader.read(OUTPUT_FILE,columns);
@@ -400,8 +425,8 @@ public class NeuralNetwork implements Serializable{
      * @return void
      * */
     public void readData(int rows,int[]columns) {
-        SVReader reader=new SVReader(",");
-        ArrayList<Double[]> list=reader.read(INPUT_FILE);
+        SeparatedVariables reader=new SeparatedVariables(",");
+        ArrayList<Double[]> list=reader.read(INPUT_FILE,rows,columns);
         dataI=new Matrix(Matrix.listTo2D(list));
         dataI.appendColumn(1.0);
         list=reader.read(OUTPUT_FILE,rows,columns);
@@ -467,11 +492,12 @@ public class NeuralNetwork implements Serializable{
         sp=new JScrollPane(ta);
         f.add(sp);
     }
+
     /*MAIN METHOD
     public static void main(String[]args) {
         String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
         String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
-        NeuralNetwork NN=new NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
+        AiHelper.NeuralNetwork NN=new AiHelper.NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
         NN.train(10000);
         NN.predict(new Double[]{0.65,0.49});
     }*/
