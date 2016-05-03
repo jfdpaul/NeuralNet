@@ -142,7 +142,7 @@ public class SeparatedVariables {
     /**
      * DSV- Delimiter Separated Variable
      * */
-    private void writeDSV(char[]arr){
+    private void writeArrayAsDSV(char[]arr){
         try{
             BufferedWriter bw=new BufferedWriter(new FileWriter("data.dat",true));
             System.out.println(arr.length);
@@ -162,7 +162,7 @@ public class SeparatedVariables {
         }
     }
 
-    public void writeImage(String file){
+    public void writeImageFileAsDSV(String file){
         int width,height;
         int count=0;
         BufferedImage img = null;
@@ -174,20 +174,37 @@ public class SeparatedVariables {
             for(int i=0; i<height; i++){
                 for(int j=0; j<width; j++){
                     Color c = new Color(img.getRGB(j, i));
-                    //System.out.println("S.No: " + " Red: " + c.getRed() +"  Green: " + c.getGreen() + " Blue: " + c.getBlue());
-                    if((c.getRed()+c.getBlue()+c.getGreen()/3>200))
+                    if((c.getRed()+c.getBlue()+c.getGreen())/3>200)
                         data[count++]=49;
                     else
                         data[count++]=48;
                 }
             }
-            writeDSV(data);
+            writeArrayAsDSV(data);
         }
         catch (IOException e) {
         }
     }
 
-    public void writeAsVector(String inFile,String outFile,int start,int limit){
+    public void writeBufferedImageAsDSV(BufferedImage img){
+        int width,height;
+        int count=0;
+        width = img.getWidth();
+        height = img.getHeight();
+        char[] data=new char[width*height];
+        for(int i=0; i<height; i++){
+            for(int j=0; j<width; j++){
+                Color c = new Color(img.getRGB(j, i));
+                if((c.getRed()+c.getBlue()+c.getGreen())/3>200)
+                    data[count++]=49;
+                else
+                    data[count++]=48;
+            }
+        }
+        writeArrayAsDSV(data);
+    }
+
+    public void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
         try {
             BufferedWriter bw=new BufferedWriter(new FileWriter(outFile,true));
             BufferedReader br=new BufferedReader(new FileReader(inFile));
@@ -208,7 +225,20 @@ public class SeparatedVariables {
         catch (IOException e) {
         }
     }
+
     public static void main(String[]args){
-        new SeparatedVariables(",").writeAsVector("C:\\Users\\SONY\\Desktop\\digits\\output.csv","C:\\Users\\SONY\\Desktop\\digits\\output2.csv",0,9);
+        //new SeparatedVariables(",").writeAsVector("C:\\Users\\SONY\\Desktop\\digits\\output.csv","C:\\Users\\SONY\\Desktop\\digits\\output2.csv",0,9);
+
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero1.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero2.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero3.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero4.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero5.png");
+
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one1.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one2.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one3.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one4.png");
+        new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one5.png");
     }
 }

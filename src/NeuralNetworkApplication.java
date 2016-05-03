@@ -31,8 +31,11 @@ public class NeuralNetworkApplication {
 
         //input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
         //output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
-        input="C:\\Users\\SONY\\Desktop\\digits\\pendigits.csv";
-        output="C:\\Users\\SONY\\Desktop\\digits\\output2.csv";
+        //input="C:\\Users\\SONY\\Desktop\\digits\\pendigits.csv";
+        //output="C:\\Users\\SONY\\Desktop\\digits\\output2.csv";
+        input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\data.dat";
+        output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\output.dat";
+
         switch(ch){
             //Case for command user interface
             case 0:

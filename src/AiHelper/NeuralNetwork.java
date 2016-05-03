@@ -207,6 +207,43 @@ public class NeuralNetwork implements Serializable{
         createConsole();
     }
 
+
+    public NeuralNetwork(double eta,int nodes[],Matrix inI,Matrix outO,double Emax){
+        //Learning Constant,nodes in layers,Path of input file
+
+        this.eta=eta;
+        EMax=Emax;
+        layer_count=nodes.length-1;
+
+        node_count=nodes;
+
+        //Adjustment for bias input (not required for output layer)
+        for(int i=0;i<layer_count;i++)
+            node_count[i]=node_count[i]+1;
+
+        D=new Matrix(node_count[layer_count],1);  //Desired value vector for output (last) layer
+
+        W=new Matrix[layer_count];              //Holds the weight matrix of each layer
+        Delta=new Matrix[layer_count];
+        NET=new Matrix[layer_count];            //Holds net value of each layer
+        Y=new Matrix[layer_count+1];            //Holds output of each layer (including input layer)
+
+        //Initialising objects in arrays
+        for(int i=0;i<=layer_count;i++) {
+            if(i>0) {
+                Delta[i-1]=new Matrix(node_count[i],1);
+                NET[i-1]=new Matrix(node_count[i],1);
+                W[i-1]=new Matrix(node_count[i],node_count[i-1], Matrix.Code.RANDOM);   //Initialising weights of layers based on node count in each layer
+            }
+
+            Y[i]=new Matrix(node_count[i],1);
+            if(i<layer_count)                      //Bias not required for output layer
+                Y[i].set(node_count[i]-1,0,1.0);   //setting fixed input to +1 (for bias)
+        }
+
+        readData(inI,outO);
+        createConsole();
+    }
     /*MEMBER METHODS*/
 
     /*Functions and Derivatives*/
@@ -215,7 +252,6 @@ public class NeuralNetwork implements Serializable{
      *
      * @return Double
      * */
-
     private Double f(Double x) {
         return 1/(1+Math.exp(-x));
     }
@@ -433,6 +469,15 @@ public class NeuralNetwork implements Serializable{
         dataO=new Matrix(Matrix.listTo2D(list));
     }
 
+    /**
+     * Method to test using in built inputs and outputs
+     * */
+    private void readData(Matrix in,Matrix out){
+        dataI=new Matrix(in);
+        dataI.appendColumn(1.0);
+        dataO=new Matrix(out);
+    }
+
     /*Display Methods*/
 
     /**
@@ -493,12 +538,37 @@ public class NeuralNetwork implements Serializable{
         f.add(sp);
     }
 
-    /*MAIN METHOD
+    //MAIN METHOD
     public static void main(String[]args) {
-        String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
-        String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
-        AiHelper.NeuralNetwork NN=new AiHelper.NeuralNetwork(0.3,new int[]{2,2,2},input,output,0.003);
+        //String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
+        //String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
+        /*
+        Double[][] in=new Double[][]{
+                {0.0,1.0,1.0,0.0,1.0,1.0,0.0,0.0,0.0},
+                {0.0,1.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0},
+                {0.0,0.0,1.0,0.0,1.0,1.0,0.0,0.0,0.0},
+                {0.0,0.0,1.0,0.0,1.0,0.0,0.0,0.0,0.0},
+                {1.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0,1.0},
+                {0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.0},
+                {1.0,0.0,0.0,1.0,0.0,0.0,1.0,1.0,0.0}};
+        Double[][] out=new Double[][]{
+                {0.0,1.0},
+                {0.0,1.0},
+                {0.0,1.0},
+                {0.0,1.0},
+                {1.0,0.0},
+                {1.0,0.0},
+                {1.0,0.0}};
+        Matrix inMat=new Matrix(in);
+        Matrix outMat=new Matrix(out);
+        NeuralNetwork NN=new NeuralNetwork(0.1,new int[]{9,2,2},inMat,outMat,0.003);
         NN.train(10000);
-        NN.predict(new Double[]{0.65,0.49});
-    }*/
+        NN.predict(new Double[]{1.0,0.0,0.0,0.0,0.0,0.0,1.0,0.0,0.0});
+        */
+
+
+        String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\data.dat";
+        String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\output.dat";
+
+    }
 }
