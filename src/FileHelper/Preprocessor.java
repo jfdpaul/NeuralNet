@@ -450,6 +450,10 @@ public class Preprocessor{
         return img;
     }
 
+    /**
+     * Method to remove noise and convert pixels of image to 0 or 255
+     *
+     * */
     public BufferedImage sharpenImage(BufferedImage img){
         int width=img.getWidth();
         int height=img.getHeight();
@@ -475,25 +479,8 @@ public class Preprocessor{
     }
 
     public static void main(String[]args)throws IOException{
-        /*String[] files={
-                "C:\\Users\\SONY\\Desktop\\digits\\zero1.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\zero2.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\zero3.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\zero4.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\zero5.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\one1.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\one2.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\one3.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\one4.png",
-                "C:\\Users\\SONY\\Desktop\\digits\\one5.png"};
-        BufferedImage[] img=new Preprocessor().normaliseImage(files);
-        SeparatedVariables sv=new SeparatedVariables(",");
-        for(int i=0;i<img.length;i++){
-            sv.writeBufferedImageAsDSV(img[i]);
-        }*/
         //File outputfile = new File("saved.png");
         //ImageIO.write(img[0], "png", outputfile);
-
 
         //BufferedImage img=ImageIO.read(new File("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\in10.png"));
         //new Preprocessor().sharpenImage(img);

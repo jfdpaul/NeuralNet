@@ -3,6 +3,7 @@
  */
 
 import AiHelper.NeuralNetwork;
+import javafx.geometry.HorizontalDirection;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,20 +23,33 @@ public class NeuralNetworkApplication {
      * DATA MEMBERS
      * */
     final NeuralNetwork[] nn={null};
-    JButton predict,train,save,load;
-    JTextArea etaText,errText,countText,inText,outText,rowCountText,columnsText,predictText;
+    JButton predict,predictString,train,save,load;
+    JTextArea etaText,errText,countText,inText,outText,rowCountText,columnsText,epochText,predictStringText,predictText;
     String input;
     String output;
 
     public NeuralNetworkApplication(int ch) {
 
-        //input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\INPUT_DATA";
-        //output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
-        //input="C:\\Users\\SONY\\Desktop\\digits\\pendigits.csv";
-        //output="C:\\Users\\SONY\\Desktop\\digits\\output2.csv";
         input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\input.dat";
         output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\output.dat";
 
+        predict=new JButton("Predict");
+        predict.addActionListener(ae -> {
+            if(predictText.getText().length()>0){
+                String nodes=predictText.getText();
+                String[] val = nodes.split(",");
+                Double[] dd = new Double[val.length];
+                for (int i = 0; i < val.length; i++) {
+                    dd[i] = Double.parseDouble(val[i]);
+                }
+                if(nn[0]!=null)
+                    nn[0].predict(dd);
+                else{
+                    System.out.println("Neural Network Not Created");
+                    JOptionPane.showMessageDialog(null,"Neural Network Not Created");
+                }
+            }
+        });
         switch(ch){
             //Case for command user interface
             case 0:
@@ -115,7 +129,7 @@ public class NeuralNetworkApplication {
     }
 
     /**
-     * Method for command interface for Neural Network working
+     * Method for graphics interface for Neural Network working
      *
      * @return void
      * */
@@ -125,41 +139,73 @@ public class NeuralNetworkApplication {
         f.setVisible(true);
         f.setSize(800,350);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        f.setLayout(new BoxLayout(f.getContentPane(),BoxLayout.Y_AXIS));
 
-        f.setLayout(new GridLayout(10,2,2,2));
+        JLabel jl=new JLabel(" TRAINING  :  ");
+        f.add(jl);
 
-        JLabel jl=new JLabel("Eta");
+        JPanel trainTop=new JPanel();
+        trainTop.setLayout(new GridLayout(3,4,20,3));
+
+        jl=new JLabel(" Eta ");
         etaText=new JTextArea("0.2");
-        f.add(jl);
-        f.add(etaText);
-        jl=new JLabel("Max Error");
+        trainTop.add(jl);
+        trainTop.add(etaText);
+        jl=new JLabel(" Max Error ");
         errText=new JTextArea("0.01");
-        f.add(jl);
-        f.add(errText);
-        jl=new JLabel("Node Count");
+        trainTop.add(jl);
+        trainTop.add(errText);
+        jl=new JLabel(" Node Count ");
         countText=new JTextArea("100,3,10");
-        f.add(jl);
-        f.add(countText);
-        jl=new JLabel("Row Count");
+        trainTop.add(jl);
+        trainTop.add(countText);
+        jl=new JLabel(" Row Count ");
         rowCountText=new JTextArea("");
-        f.add(jl);
-        f.add(rowCountText);
-        jl=new JLabel("Columns");
+        trainTop.add(jl);
+        trainTop.add(rowCountText);
+        jl=new JLabel(" Columns ");
         columnsText=new JTextArea("0,1,2,3,4");
-        f.add(jl);
-        f.add(columnsText);
-        jl=new JLabel("Input Data File");
+        trainTop.add(jl);
+        trainTop.add(columnsText);
+        jl=new JLabel(" Epoch ");
+        epochText=new JTextArea("10000");
+        trainTop.add(jl);
+        trainTop.add(epochText);
+
+        f.add(trainTop);
+
+        JPanel trainBottom=new JPanel();
+        trainBottom.setLayout(new GridLayout(2,2,20,3));
+
+        jl=new JLabel(" Input Data File ");
         inText=new JTextArea(input);
-        f.add(jl);
-        f.add(inText);
-        jl=new JLabel("Output Data File");
+        trainBottom.add(jl);
+        trainBottom.add(inText);
+        jl=new JLabel(" Output Data File ");
         outText=new JTextArea(output);
+        trainBottom.add(jl);
+        trainBottom.add(outText);
+
+        f.add(trainBottom);
+
+        jl=new JLabel(" PREDICTION  :  ");
         f.add(jl);
-        f.add(outText);
-        jl=new JLabel("Inputs for Prediction");
+
+        JPanel predictPanel=new JPanel();
+        predictPanel.setLayout(new GridLayout(2,2,3,3));
+
+        jl=new JLabel("Feature Vector Input");
         predictText=new JTextArea("0.65,0.49");
-        f.add(jl);
-        f.add(predictText);
+        predictPanel.add(jl);
+        predictPanel.add(predictText);
+
+        jl=new JLabel("File Batch Input");
+        predictStringText=new JTextArea("(File Path)");
+        predictPanel.add(jl);
+        predictPanel.add(predictStringText);
+
+        f.add(predictPanel);
+
         train=new JButton("Train");
         train.addActionListener(ae -> {
             if(isTrainingFieldsFilled()){
@@ -200,17 +246,36 @@ public class NeuralNetworkApplication {
 
 
                 new Thread(()->{
-                        int epoch=Integer.parseInt(JOptionPane.showInputDialog(null,"Epoch : ","10000"));
+                        int epoch=Integer.parseInt(epochText.getText());
                         nn[0].train(epoch);
                         JOptionPane.showMessageDialog(null,"Training Complete");
                 }).start();
             }
         });
 
-        predict=new JButton("Predict");
+        predict=new JButton("Predict Vector");
         predict.addActionListener(ae -> {
             if(predictText.getText().length()>0){
                 String nodes=predictText.getText();
+                String[] val = nodes.split(",");
+                Double[] dd = new Double[val.length];
+                for (int i = 0; i < val.length; i++) {
+                    dd[i] = Double.parseDouble(val[i]);
+                }
+                if(nn[0]!=null)
+                    nn[0].predict(dd);
+                else{
+                    System.out.println("Neural Network Not Created");
+                    JOptionPane.showMessageDialog(null,"Neural Network Not Created");
+                }
+            }
+        });
+
+        //TODO
+        predictString=new JButton("Predict Image");
+        predictString.addActionListener(ae -> {
+            if(predictStringText.getText().length()>0){
+                String nodes=predictStringText.getText();
                 String[] val = nodes.split(",");
                 Double[] dd = new Double[val.length];
                 for (int i = 0; i < val.length; i++) {
@@ -239,10 +304,15 @@ public class NeuralNetworkApplication {
             JOptionPane.showMessageDialog(null,"Data Loaded");
         });
 
-        f.add(train);
-        f.add(predict);
-        f.add(save);
-        f.add(load);
+        JPanel buttonPanel=new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(train);
+        buttonPanel.add(predict);
+        buttonPanel.add(predictString);
+        buttonPanel.add(save);
+        buttonPanel.add(load);
+
+        f.add(buttonPanel);
     }
 
     /**
