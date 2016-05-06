@@ -4,6 +4,7 @@ import AlgebraHelper.Matrix;
 import FileHelper.SeparatedVariables;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -500,6 +501,18 @@ public class NeuralNetwork implements Serializable{
         for(int i=0;i<res.length();i++) {
             toDisplay("\nOut "+(i+1)+" : "+res.get(i,0));
         }
+    }
+
+    public void showHighest() {
+        double max=NET[layer_count-1].get(0,0),maxIndex=0;
+        for(int i=0;i<NET[layer_count-1].length();i++) {
+            if(NET[layer_count-1].get(i,0)>max){
+                max=NET[layer_count-1].get(i,0);
+                maxIndex=i;
+            }
+        }
+        toDisplay("\n"+maxIndex);
+        //new File(file).delete();
     }
 
     /**Method to display Failure of Convergence to Desired error

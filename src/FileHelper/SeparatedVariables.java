@@ -56,6 +56,16 @@ public class SeparatedVariables {
         return listD;
     }
 
+    public Double[] getSplitContents(String dsv){
+        String[] v = dsv.split(dlim);
+        Double[] d = new Double[v.length];
+        for (int i = 0; i < v.length; i++) {
+            d[i] = Double.parseDouble(v[i]);
+        }
+        return d;
+    }
+
+
     /**
      * Method to read all columns from file for first 'row_count' rows
      *
@@ -162,7 +172,7 @@ public class SeparatedVariables {
         }
     }
 
-    public void writeImageFileAsDSV(String file,String fileName){
+    private void writeImageFileAsDSV(String file,String fileName){
         int width,height;
         int count=0;
         BufferedImage img = null;
@@ -206,7 +216,7 @@ public class SeparatedVariables {
         }
     }
 
-    public void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
+    private void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
         try {
             BufferedWriter bw=new BufferedWriter(new FileWriter(outFile,true));
             BufferedReader br=new BufferedReader(new FileReader(inFile));
@@ -226,6 +236,31 @@ public class SeparatedVariables {
         }
         catch (IOException e) {
         }
+    }
+
+    /**
+     * Method to read a vector of zeros and ones to interpret as a digit between 0 and 9
+     * */
+    public ArrayList<Integer> readBinaryVectorAsDigit(String inFile){
+        ArrayList<Integer> arr=new ArrayList<>();
+        try {
+            BufferedReader br=new BufferedReader(new FileReader(inFile));
+            String str="";
+            while((str=br.readLine())!=null){
+                Double[] el=getSplitContents(str);
+                int i=0;
+                for(;i<el.length;i++){
+                    if(el[i]==1)
+                        break;
+                }
+                arr.add(i);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return arr;
     }
 
     public static void main(String[]args){

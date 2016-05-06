@@ -3,6 +3,7 @@
  */
 
 import AiHelper.NeuralNetwork;
+import FileHelper.Preprocessor;
 import javafx.geometry.HorizontalDirection;
 
 import javax.swing.*;
@@ -23,7 +24,7 @@ public class NeuralNetworkApplication {
      * DATA MEMBERS
      * */
     final NeuralNetwork[] nn={null};
-    JButton predict,predictString,train,save,load;
+    JButton predict,predictString,train,save,load,create;
     JTextArea etaText,errText,countText,inText,outText,rowCountText,columnsText,epochText,predictStringText,predictText;
     String input;
     String output;
@@ -206,28 +207,28 @@ public class NeuralNetworkApplication {
 
         f.add(predictPanel);
 
-        train=new JButton("Train");
-        train.addActionListener(ae -> {
-            if(isTrainingFieldsFilled()){
+        create=new JButton("Create");
+        create.addActionListener(ae->{
+            if(isTrainingFieldsFilled()) {
 
                 double eta = Double.parseDouble(etaText.getText());
 
-                String nodes=countText.getText();
+                String nodes = countText.getText();
                 String[] v = nodes.split(",");
                 int[] d = new int[v.length];
                 for (int i = 0; i < v.length; i++) {
                     d[i] = Integer.parseInt(v[i]);
                 }
 
-                double err=Double.parseDouble(errText.getText());
-                int rows=0;
-                String sRows=rowCountText.getText();
-                if(!sRows.equals(""))
-                    rows=Integer.parseInt(sRows);
+                double err = Double.parseDouble(errText.getText());
+                int rows = 0;
+                String sRows = rowCountText.getText();
+                if (!sRows.equals(""))
+                    rows = Integer.parseInt(sRows);
 
-                int[] columns=null;
-                String sColumns=columnsText.getText();
-                if(!sColumns.equals("")){
+                int[] columns = null;
+                String sColumns = columnsText.getText();
+                if (!sColumns.equals("")) {
                     v = sColumns.split(",");
                     columns = new int[v.length];
                     for (int i = 0; i < v.length; i++) {
@@ -235,23 +236,28 @@ public class NeuralNetworkApplication {
                     }
                 }
 
-                if(rows==0&&columns==null)
-                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err);
-                else if(columns!=null&&rows>0)
-                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,rows,columns);
-                else if(rows>0&&columns==null)
-                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,rows);
+                if (rows == 0 && columns == null)
+                    nn[0] = new NeuralNetwork(eta, d, inText.getText(), outText.getText(), err);
+                else if (columns != null && rows > 0)
+                    nn[0] = new NeuralNetwork(eta, d, inText.getText(), outText.getText(), err, rows, columns);
+                else if (rows > 0 && columns == null)
+                    nn[0] = new NeuralNetwork(eta, d, inText.getText(), outText.getText(), err, rows);
                 else
-                    nn[0] = new NeuralNetwork(eta,d,inText.getText(),outText.getText(),err,columns);
+                    nn[0] = new NeuralNetwork(eta, d, inText.getText(), outText.getText(), err, columns);
+                }
+            JOptionPane.showMessageDialog(null,"NeuralNet Created");
+            }
+        );
 
-
+        train=new JButton("Train");
+        train.addActionListener(ae -> {
                 new Thread(()->{
                         int epoch=Integer.parseInt(epochText.getText());
                         nn[0].train(epoch);
                         JOptionPane.showMessageDialog(null,"Training Complete");
                 }).start();
             }
-        });
+        );
 
         predict=new JButton("Predict Vector");
         predict.addActionListener(ae -> {
@@ -271,18 +277,17 @@ public class NeuralNetworkApplication {
             }
         });
 
-        //TODO
         predictString=new JButton("Predict Image");
         predictString.addActionListener(ae -> {
             if(predictStringText.getText().length()>0){
-                String nodes=predictStringText.getText();
-                String[] val = nodes.split(",");
-                Double[] dd = new Double[val.length];
-                for (int i = 0; i < val.length; i++) {
-                    dd[i] = Double.parseDouble(val[i]);
+                String file=predictStringText.getText();
+                if(nn[0]!=null) {
+                    Preprocessor pr=new Preprocessor();
+                    pr.cropNSaveResult(file);  //crops string of digits to feature vectors in an output.res file
+                    //read each feature vector, perform feed-forward and interpret result
+                    pr.interpretResult(nn[0]);
+                    pr.deleteAll();
                 }
-                if(nn[0]!=null)
-                    nn[0].predict(dd);
                 else{
                     System.out.println("Neural Network Not Created");
                     JOptionPane.showMessageDialog(null,"Neural Network Not Created");
@@ -306,6 +311,7 @@ public class NeuralNetworkApplication {
 
         JPanel buttonPanel=new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(create);
         buttonPanel.add(train);
         buttonPanel.add(predict);
         buttonPanel.add(predictString);

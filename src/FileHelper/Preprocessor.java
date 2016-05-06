@@ -4,11 +4,12 @@ package FileHelper;
  * Created by Jonathan on 5/2/2016.
  */
 
+import AiHelper.NeuralNetwork;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 /**
@@ -20,6 +21,8 @@ import java.util.ArrayList;
  * */
 public class Preprocessor{
 
+    final String TEMP_OUTPUT="output.res";
+
     private class DimensionHolder{
         int yt,yb,xl,xr;
         public void display(){
@@ -29,11 +32,7 @@ public class Preprocessor{
 
     /*METHOD DEFINITIONS*/
 
-    public void cropNSave(String file)throws IOException{
-
-        /*Find average color*/
-
-        /*Find */
+    private void cropNSave(String file)throws IOException{
 
         ArrayList<DimensionHolder> list=new ArrayList<>();
         BufferedImage img=ImageIO.read(new File(file));
@@ -96,7 +95,9 @@ public class Preprocessor{
 
     private void writeImagesFromList(ArrayList<DimensionHolder> list,BufferedImage image){
         int length=list.size();
-        System.out.println("Length="+length);
+
+        //System.out.println("Length="+length);
+
         BufferedImage[] images=new BufferedImage[length];
         int k=0;
         for(DimensionHolder v:list) {
@@ -107,7 +108,7 @@ public class Preprocessor{
                 for (int i = v.xl; i <= v.xr; i++) {
                     jj = 0;
                     for (int j = v.yt; j <= v.yb; j++) {
-                        System.out.println("i=" + i + " j=" + j + " ii=" + ii + " jj=" + jj);
+                        //System.out.println("i=" + i + " j=" + j + " ii=" + ii + " jj=" + jj);
                         images[k].setRGB(ii, jj++, image.getRGB(i, j));
                     }
                     ii++;
@@ -118,29 +119,146 @@ public class Preprocessor{
                 System.out.println("Error Found");
             }
         }
+
+        //writeAsImage(images,"imgs","img.png","png");
+        BufferedImage[] normalised = normaliseImage(images);
+        //writeAsImage(normalised,"imgs","norm.png","png");
+
+        SeparatedVariables sv = new SeparatedVariables(",");
+        for (int i = 0; i < normalised.length; i++) {
+            sv.writeBufferedImageAsDSV(normalised[i], (i + 1) + ".out");
+        }
+    }
+
+    public void cropNSaveResult(String file){
+
+        ArrayList<DimensionHolder> list=new ArrayList<>();
+        BufferedImage img= null;
+        try {
+            img = ImageIO.read(new File(file));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        img=sharpenImage(img);
+        int cols=img.getWidth();
+        int rows=img.getHeight();
+
+        boolean tr=false,found;
+        DimensionHolder dm=null;
+
+        //Making vertical cuts
+        for(int j=0;j<cols;j++){
+            found=false;
+            for(int i=0;i<rows;i++){
+                if(getAverageColor(img,j,i)<50){
+                    if(!tr){
+                        dm=new DimensionHolder();
+                        dm.xl=j;
+                        tr=true;
+                    }
+                    else{
+                        dm.xr=j;
+                    }
+                    found=true;
+                    break;
+                }
+            }
+            if(!found) {
+                tr = false;
+                if(dm!=null&&(dm.xr-dm.xl)>1){
+                    list.add(dm);           //add to list if size is considerable
+                    dm=null;
+                }
+            }
+        }
+
+        //Making horizontal cuts
+        for(DimensionHolder v:list){
+            for(int j=0;j<rows;j++){
+                for(int i=v.xl;i<=v.xr;i++){
+                    if(getAverageColor(img,i,j)<50){
+                        v.yb=j;
+                    }
+                }
+            }
+
+            for(int j=rows-1;j>=0;j--){
+                for(int i=v.xl;i<=v.xr;i++){
+                    if(getAverageColor(img,i,j)<50){
+                        v.yt=j;
+                    }
+                }
+            }
+        }
+
+        writeResultFromList(list,img);
+    }
+
+    private void writeResultFromList(ArrayList<DimensionHolder> list,BufferedImage image){
+        int length=list.size();
+
+        BufferedImage[] images=new BufferedImage[length];
+        int k=0;
+        for(DimensionHolder v:list) {
+            if (v.yb > v.yt && v.xr > v.xl) {
+                images[k] = new BufferedImage((v.xr - v.xl + 1), (v.yb - v.yt + 1), BufferedImage.TYPE_INT_RGB);
+                int ii = 0, jj;
+                for (int i = v.xl; i <= v.xr; i++) {
+                    jj = 0;
+                    for (int j = v.yt; j <= v.yb; j++) {
+                        images[k].setRGB(ii, jj++, image.getRGB(i, j));
+                    }
+                    ii++;
+                }
+                k++;
+            }
+            else{
+                System.out.println("Error Found");
+            }
+        }
+
+        BufferedImage[] normalised = normaliseImage(images);
+        SeparatedVariables sv = new SeparatedVariables(",");
+        for (int i = 0; i < normalised.length; i++) {
+            sv.writeBufferedImageAsDSV(normalised[i], TEMP_OUTPUT);
+        }
+    }
+
+    public void interpretResult(NeuralNetwork nn){
+
+        BufferedReader br= null;
+        try {
+            br = new BufferedReader(new FileReader(TEMP_OUTPUT));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        String str;
+        try {
+            while((str=br.readLine())!=null){
+                Double[] d=new SeparatedVariables(",").getSplitContents(str);
+                nn.predict(d);
+                nn.showHighest();
+            }
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteAll(){
+        new File(TEMP_OUTPUT).delete();
+    }
+
+    private void writeAsImage(BufferedImage[] images,String path,String commonName,String format){
         for(int i=0;i<images.length;i++){
-            File outputfile = new File("imgs\\"+i+"crop.png");
+            File outputfile = new File(path+"\\"+i+commonName);
             try {
                 if(images[i]!=null)
-                    ImageIO.write(images[i], "png", outputfile);
+                    ImageIO.write(images[i], format, outputfile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-            BufferedImage[] normalised = normaliseImage(images);
-            for(int i=0;i<normalised.length;i++){
-                File outputfile = new File("imgs\\"+i+"norm.png");
-                try {
-                    if(normalised[i]!=null)
-                    ImageIO.write(normalised[i], "png", outputfile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            SeparatedVariables sv = new SeparatedVariables(",");
-            for (int i = 0; i < normalised.length; i++) {
-                sv.writeBufferedImageAsDSV(normalised[i], (i + 1) + ".out");
-            }
     }
 
     private int getAverageColor(BufferedImage img,int x,int y){
@@ -148,7 +266,7 @@ public class Preprocessor{
         return (c.getRed()+c.getBlue()+c.getGreen())/3;
     }
 
-    public BufferedImage[] normaliseImage(BufferedImage[] imageName) {
+    private BufferedImage[] normaliseImage(BufferedImage[] imageName) {
 
         BufferedImage[] data = new BufferedImage[imageName.length];
         for (int k = 0; k < imageName.length; k++) {
@@ -323,7 +441,7 @@ public class Preprocessor{
         return data;
     }
 
-    public BufferedImage[] normaliseImage(String[] fileName){
+    private BufferedImage[] normaliseImage(String[] fileName){
 
         BufferedImage[] data=new BufferedImage[fileName.length];//=new BufferedImage(100,100, BufferedImage.TYPE_INT_RGB);
         for(int k=0;k<fileName.length;k++){
@@ -454,7 +572,7 @@ public class Preprocessor{
      * Method to remove noise and convert pixels of image to 0 or 255
      *
      * */
-    public BufferedImage sharpenImage(BufferedImage img){
+    private BufferedImage sharpenImage(BufferedImage img){
         int width=img.getWidth();
         int height=img.getHeight();
         int sum=0;
