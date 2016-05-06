@@ -386,7 +386,7 @@ public class NeuralNetwork implements Serializable{
                 ETotal+=calculateError();
                 backPropagate();
             }
-            toDisplay("\nError : "+ETotal);
+            toDisplay("\n"+ETotal);
             if(ETotal<EMax){
                 tr=true;
                 break;
@@ -396,6 +396,7 @@ public class NeuralNetwork implements Serializable{
             else
                 prevErr=ETotal;
         }
+        System.out.println("Max Epoch reached");
         if(!tr)
             showTerminationMessage();
     }
@@ -567,7 +568,7 @@ public class NeuralNetwork implements Serializable{
         */
 
 
-        String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\data.dat";
+        String input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\input.dat";
         String output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\output.dat";
 
     }

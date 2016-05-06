@@ -33,7 +33,7 @@ public class NeuralNetworkApplication {
         //output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\OUTPUT_DATA";
         //input="C:\\Users\\SONY\\Desktop\\digits\\pendigits.csv";
         //output="C:\\Users\\SONY\\Desktop\\digits\\output2.csv";
-        input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\data.dat";
+        input="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\input.dat";
         output="C:\\Users\\SONY\\IdeaProjects\\NeuralNet\\output.dat";
 
         switch(ch){
@@ -129,15 +129,15 @@ public class NeuralNetworkApplication {
         f.setLayout(new GridLayout(10,2,2,2));
 
         JLabel jl=new JLabel("Eta");
-        etaText=new JTextArea("0.6");
+        etaText=new JTextArea("0.2");
         f.add(jl);
         f.add(etaText);
         jl=new JLabel("Max Error");
-        errText=new JTextArea("0.001");
+        errText=new JTextArea("0.01");
         f.add(jl);
         f.add(errText);
         jl=new JLabel("Node Count");
-        countText=new JTextArea("2,3,2");
+        countText=new JTextArea("100,3,10");
         f.add(jl);
         f.add(countText);
         jl=new JLabel("Row Count");

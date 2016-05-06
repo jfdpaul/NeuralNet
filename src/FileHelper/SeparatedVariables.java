@@ -142,9 +142,9 @@ public class SeparatedVariables {
     /**
      * DSV- Delimiter Separated Variable
      * */
-    private void writeArrayAsDSV(char[]arr){
+    private void writeArrayAsDSV(char[]arr,String fileName){
         try{
-            BufferedWriter bw=new BufferedWriter(new FileWriter("data.dat",true));
+            BufferedWriter bw=new BufferedWriter(new FileWriter(fileName,true));
             System.out.println(arr.length);
             String str="";
             for(int i=0;i<arr.length;i++){
@@ -162,7 +162,7 @@ public class SeparatedVariables {
         }
     }
 
-    public void writeImageFileAsDSV(String file){
+    public void writeImageFileAsDSV(String file,String fileName){
         int width,height;
         int count=0;
         BufferedImage img = null;
@@ -180,28 +180,30 @@ public class SeparatedVariables {
                         data[count++]=48;
                 }
             }
-            writeArrayAsDSV(data);
+            writeArrayAsDSV(data,fileName);
         }
         catch (IOException e) {
         }
     }
 
-    public void writeBufferedImageAsDSV(BufferedImage img){
+    public void writeBufferedImageAsDSV(BufferedImage img,String fileName){
         int width,height;
         int count=0;
-        width = img.getWidth();
-        height = img.getHeight();
-        char[] data=new char[width*height];
-        for(int i=0; i<height; i++){
-            for(int j=0; j<width; j++){
-                Color c = new Color(img.getRGB(j, i));
-                if((c.getRed()+c.getBlue()+c.getGreen())/3>200)
-                    data[count++]=49;
-                else
-                    data[count++]=48;
+        if(img!=null) {
+            width = img.getWidth();
+            height = img.getHeight();
+            char[] data = new char[width * height];
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    Color c = new Color(img.getRGB(j, i));
+                    if ((c.getRed() + c.getBlue() + c.getGreen()) / 3 > 200)
+                        data[count++] = 49;
+                    else
+                        data[count++] = 48;
+                }
             }
+            writeArrayAsDSV(data, fileName);
         }
-        writeArrayAsDSV(data);
     }
 
     public void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
@@ -228,7 +230,7 @@ public class SeparatedVariables {
 
     public static void main(String[]args){
         //new SeparatedVariables(",").writeAsVector("C:\\Users\\SONY\\Desktop\\digits\\output.csv","C:\\Users\\SONY\\Desktop\\digits\\output2.csv",0,9);
-
+/*
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero1.png");
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero2.png");
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\zero3.png");
@@ -240,5 +242,7 @@ public class SeparatedVariables {
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one3.png");
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one4.png");
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one5.png");
+
+    */
     }
 }
