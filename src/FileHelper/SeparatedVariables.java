@@ -279,5 +279,7 @@ public class SeparatedVariables {
         new SeparatedVariables(",").writeImageFileAsDSV("C:\\Users\\SONY\\Desktop\\digits\\one5.png");
 
     */
+        new SeparatedVariables(",").writeDigitToBinaryVector("output.dat","out.dat",0,9);
+
     }
 }

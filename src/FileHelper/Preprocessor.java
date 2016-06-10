@@ -21,8 +21,9 @@ import java.util.ArrayList;
  * */
 public class Preprocessor{
 
+    static int label=-1;
     final String TEMP_OUTPUT="output.res";
-
+    final int threshold=200;
     private class DimensionHolder{
         int yt,yb,xl,xr;
         public void display(){
@@ -47,7 +48,7 @@ public class Preprocessor{
         for(int j=0;j<cols;j++){
             found=false;
             for(int i=0;i<rows;i++){
-                if(getAverageColor(img,j,i)<50){
+                if(getAverageColor(img,j,i)>threshold){
                     if(!tr){
                         dm=new DimensionHolder();
                         dm.xl=j;
@@ -73,7 +74,7 @@ public class Preprocessor{
         for(DimensionHolder v:list){
             for(int j=0;j<rows;j++){
                 for(int i=v.xl;i<=v.xr;i++){
-                    if(getAverageColor(img,i,j)<50){
+                    if(getAverageColor(img,i,j)>threshold){
                         v.yb=j;
                     }
                 }
@@ -81,18 +82,25 @@ public class Preprocessor{
 
             for(int j=rows-1;j>=0;j--){
                 for(int i=v.xl;i<=v.xr;i++){
-                    if(getAverageColor(img,i,j)<50){
+                    if(getAverageColor(img,i,j)>threshold){
                         v.yt=j;
                     }
                 }
             }
         }
-        /*for(DimensionHolder d:list){
+
+        /*
+        for(DimensionHolder d:list){
             d.display();
-        }*/
+        }
+        */
+
         writeImagesFromList(list,img);
     }
 
+    /**
+     * Method to take input of boundary dimensions and the related image. Then to crop these images into sub-images, normalise te images and
+     * */
     private void writeImagesFromList(ArrayList<DimensionHolder> list,BufferedImage image){
         int length=list.size();
 
@@ -101,7 +109,7 @@ public class Preprocessor{
         BufferedImage[] images=new BufferedImage[length];
         int k=0;
         for(DimensionHolder v:list) {
-            System.out.println("k="+k);//+" yt=" + v.yt + "yb=" + v.yb + "xl=" + v.xl + "xr=" + v.xr);
+            //System.out.println("k="+k);//+" yt=" + v.yt + "yb=" + v.yb + "xl=" + v.xl + "xr=" + v.xr);
             if (v.yb > v.yt && v.xr > v.xl) {
                 images[k] = new BufferedImage((v.xr - v.xl + 1), (v.yb - v.yt + 1), BufferedImage.TYPE_INT_RGB);
                 int ii = 0, jj;
@@ -124,9 +132,25 @@ public class Preprocessor{
         BufferedImage[] normalised = normaliseImage(images);
         //writeAsImage(normalised,"imgs","norm.png","png");
 
+
         SeparatedVariables sv = new SeparatedVariables(",");
-        for (int i = 0; i < normalised.length; i++) {
+
+        //This loop works for input images with 0 through 9 in series and thus writes/appends files 1.out through 10.out for each image
+        /*for (int i = 0; i < normalised.length; i++) {
             sv.writeBufferedImageAsDSV(normalised[i], (i + 1) + ".out");
+        }*/
+
+
+        //Writes the input values and label values.
+        for (int i = 0; i < normalised.length; i++) {
+            sv.writeBufferedImageAsDSV(normalised[i], "input.out");
+            try{
+                BufferedWriter bw=new BufferedWriter(new FileWriter("output.dat",true));
+                bw.write("\n"+label);
+                bw.close();
+            }
+            catch(Exception e){
+            }
         }
     }
 
@@ -150,7 +174,7 @@ public class Preprocessor{
         for(int j=0;j<cols;j++){
             found=false;
             for(int i=0;i<rows;i++){
-                if(getAverageColor(img,j,i)<50){
+                if(getAverageColor(img,j,i)>threshold){
                     if(!tr){
                         dm=new DimensionHolder();
                         dm.xl=j;
@@ -176,7 +200,7 @@ public class Preprocessor{
         for(DimensionHolder v:list){
             for(int j=0;j<rows;j++){
                 for(int i=v.xl;i<=v.xr;i++){
-                    if(getAverageColor(img,i,j)<50){
+                    if(getAverageColor(img,i,j)>200){
                         v.yb=j;
                     }
                 }
@@ -184,7 +208,7 @@ public class Preprocessor{
 
             for(int j=rows-1;j>=0;j--){
                 for(int i=v.xl;i<=v.xr;i++){
-                    if(getAverageColor(img,i,j)<50){
+                    if(getAverageColor(img,i,j)>200){
                         v.yt=j;
                     }
                 }
@@ -271,21 +295,19 @@ public class Preprocessor{
         BufferedImage[] data = new BufferedImage[imageName.length];
         for (int k = 0; k < imageName.length; k++) {
             if(imageName[k]!=null){
-                BufferedImage img1, img2;
+                BufferedImage img2;
                 int xl = 0, xr = 0, yt = 0, yb = 0;
                 int width, height;
-                img1 = imageName[k];
-                width = img1.getWidth();
-                height = img1.getHeight();
-                img2 = removeNoise(img1);
-
+                img2 = imageName[k];
+                width = img2.getWidth();
+                height = img2.getHeight();
 
                 boolean tr = false;
                 for (int i = 0; i < height; i++) {
                     for (int j = 0; j < width; j++) {
                         Color c = new Color(img2.getRGB(j, i));
                         int avgColor = (c.getRed() + c.getBlue() + c.getGreen()) / 3;
-                        if (avgColor < 50) {
+                        if (avgColor > threshold) {
                             yt = i;
                             tr = true;
                             break;
@@ -300,7 +322,7 @@ public class Preprocessor{
                     for (int j = 0; j < width; j++) {
                         Color c = new Color(img2.getRGB(j, i));
                         int avgColor = (c.getRed() + c.getBlue() + c.getGreen()) / 3;
-                        if (avgColor < 50) {
+                        if (avgColor > threshold) {
                             yb = i;
                             tr = true;
                             break;
@@ -315,7 +337,7 @@ public class Preprocessor{
                     for (int j = 0; j < height; j++) {
                         Color c = new Color(img2.getRGB(i, j));
                         int avgColor = (c.getRed() + c.getBlue() + c.getGreen()) / 3;
-                        if (avgColor < 50) {
+                        if (avgColor > threshold) {
                             xr = i;
                             tr = true;
                             break;
@@ -330,7 +352,7 @@ public class Preprocessor{
                     for (int j = 0; j < height; j++) {
                         Color c = new Color(img2.getRGB(i, j));
                         int avgColor = (c.getRed() + c.getBlue() + c.getGreen()) / 3;
-                        if (avgColor < 50) {
+                        if (avgColor > threshold) {
                             xl = i;
                             tr = true;
                             break;
@@ -370,12 +392,14 @@ public class Preprocessor{
                         int trr = 0;
                         for (int kk = i; kk < i + f; kk++) {
                             for (int ll = j; ll < j + f; ll++) {
-                                int val = 255;
+                                int val = 0;
+                                //int val=255;
                                 if (kk < height && ll < width && kk >= 0 && ll >= 0) {
                                     Color col = new Color(img2.getRGB(ll, kk));
                                     val = (col.getRed() + col.getGreen() + col.getBlue()) / 3;
                                 }
-                                if (val < 50) {
+                                //if (val < 50) {
+                                if (val > threshold) {
                                     trr = 1;
                                     break;
                                 }
@@ -459,7 +483,7 @@ public class Preprocessor{
                     for(int j=0; j<width; j++){
                         Color c = new Color(img2.getRGB(j, i));
                         int avgColor=(c.getRed()+c.getBlue()+c.getGreen())/3;
-                        if(avgColor<30){
+                        if(avgColor>threshold){
                             yt=i;
                             tr=true;
                             break;
@@ -474,7 +498,7 @@ public class Preprocessor{
                     for(int j=0; j<width; j++){
                         Color c = new Color(img2.getRGB(j, i));
                         int avgColor=(c.getRed()+c.getBlue()+c.getGreen())/3;
-                        if(avgColor<30){
+                        if(avgColor>threshold){
                             yb=i;
                             tr=true;
                             break;
@@ -489,7 +513,7 @@ public class Preprocessor{
                     for(int j=0; j<height; j++){
                         Color c = new Color(img2.getRGB(i, j));
                         int avgColor=(c.getRed()+c.getBlue()+c.getGreen())/3;
-                        if(avgColor<30){
+                        if(avgColor>threshold){
                             xr=i;
                             tr=true;
                             break;
@@ -504,7 +528,7 @@ public class Preprocessor{
                     for(int j=0; j<height; j++){
                         Color c = new Color(img2.getRGB(i, j));
                         int avgColor=(c.getRed()+c.getBlue()+c.getGreen())/3;
-                        if(avgColor<30){
+                        if(avgColor>threshold){
                             xl=i;
                             tr=true;
                             break;
@@ -539,12 +563,12 @@ public class Preprocessor{
                         int trr=0;
                         for(int kk=i;kk<=i+f;kk++){
                             for(int ll=j;ll<=j+f;ll++){
-                                int val=255;
+                                int val=0;
                                 if(kk<height&&ll<width&&kk>=0&&ll>=0) {
                                     Color col = new Color(img2.getRGB(ll, kk));
                                     val=(col.getRed()+col.getGreen()+col.getBlue())/3;
                                 }
-                                if(val<30){
+                                if(val>threshold){
                                     trr=1;
                                     break;
                                 }
@@ -582,6 +606,7 @@ public class Preprocessor{
                 sum+=(c.getRed()+c.getBlue()+c.getGreen())/3;
             }
         }
+
         int avg=sum/height/width;
         BufferedImage imgTemp=new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
         for(int i=0;i<height;i++){
@@ -604,15 +629,18 @@ public class Preprocessor{
         //new Preprocessor().sharpenImage(img);
         /*
         new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp1.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp2.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp3.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp4.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp5.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp6.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp7.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp8.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp9.png");
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp10.png");*/
-        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\test.png");
+        new Preprocessor().cropNSave("C:\\Users\\SONY\\Desktop\\digits\\jonathan\\inp2.png");*/
+
+
+        for(int j=1;j<=1000;j++) {
+            for (int i = 0; i < 10; i++) {
+                label=i;
+                String file = i+"img" + j + ".png";
+                new Preprocessor().cropNSave("F:\\MCA\\Research\\zipCodeRecognition\\data\\images\\"+i+"\\" + file);
+
+            }
+        }
+
+        //new Preprocessor().cropNSave("F:\\MCA\\Research\\zipCodeRecognition\\data\\images\\0\\0img1.png");
     }
 }

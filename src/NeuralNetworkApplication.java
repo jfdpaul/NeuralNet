@@ -17,7 +17,7 @@ import java.io.*;
  * @see NeuralNetwork
  * @since 1.0
  *
- * */
+ **/
 public class NeuralNetworkApplication {
 
     /**

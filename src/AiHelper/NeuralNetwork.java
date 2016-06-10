@@ -380,8 +380,8 @@ public class NeuralNetwork implements Serializable{
         double prevErr=0;
         for(int i=0;i<maxEpoch;i++) {
             double ETotal=0.0;
-            for(int j=0;j<dataI.length();j++) {
-                Y[0]=new Matrix(dataI.getRow(j).transpose().divide(100.0));
+            for(int j=0;j<(int)Math.floor(dataI.length()*0.7);j++) {
+                Y[0]=new Matrix(dataI.getRow(j).transpose().divide(150.0));
                 D=new Matrix(dataO.getRow(j).transpose());
                 feedForward();
                 ETotal+=calculateError();
@@ -400,6 +400,18 @@ public class NeuralNetwork implements Serializable{
         System.out.println("Max Epoch reached");
         if(!tr)
             showTerminationMessage();
+    }
+
+    public void test(){
+        double prevErr=0;
+        double ETotal=0.0;
+        for(int j=(int)Math.floor(dataI.length()*0.7);j<dataI.length();j++) {
+            Y[0]=new Matrix(dataI.getRow(j).transpose().divide(100.0));
+            D=new Matrix(dataO.getRow(j).transpose());
+            feedForward();
+            ETotal+=calculateError();
+            backPropagate();
+        }
     }
 
     /**
