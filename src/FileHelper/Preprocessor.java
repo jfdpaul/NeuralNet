@@ -5,6 +5,7 @@ package FileHelper;
  */
 
 import AiHelper.NeuralNetwork;
+import AlgebraHelper.Matrix;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
  * */
 public class Preprocessor{
 
+    int d = 10;
     static int label=-1;
     final String TEMP_OUTPUT="output.res";
     final int threshold=200;
@@ -143,7 +145,12 @@ public class Preprocessor{
 
         //Writes the input values and label values.
         for (int i = 0; i < normalised.length; i++) {
-            sv.writeBufferedImageAsDSV(normalised[i], "input.out");
+            //sv.writeBufferedImageAsDSV(normalised[i], "input.out");
+
+            //Extract the row and column features
+            int[] mat=getRowColPixelCount(normalised);
+            sv.writeVectorAsDSV(mat,"input.dat");
+
             try{
                 BufferedWriter bw=new BufferedWriter(new FileWriter("output.dat",true));
                 bw.write("\n"+label);
@@ -369,7 +376,6 @@ public class Preprocessor{
                 */
                 //System.out.println("xl=" + xl + " xr=" + xr + " yt=" + yt + " yb=" + yb);
 
-                int d = 10;
                 int xm = (int) Math.ceil((xr + xl) / 2);
                 int ym = (int) Math.ceil((yb + yt) / 2);
                 int delx=xr - xl;
@@ -378,7 +384,6 @@ public class Preprocessor{
                 dely+=d-dely%d;
                 //System.out.println("Del "+dely%d+" "+delx%d);
                 int del = Math.max(delx,dely);
-
 
                 int f = (int) Math.ceil(del / d);
                 data[k] = new BufferedImage(d, d, BufferedImage.TYPE_INT_RGB);
@@ -621,6 +626,31 @@ public class Preprocessor{
         return imgTemp;
     }
 
+    private int[] getRowColPixelCount(BufferedImage[] img){
+        int countR=0,countC=0;
+        int l=0;
+        int vector[]=new int[2*d];
+        for(int i=0;i<1;i++){
+            for(int j=0;j<d;j++){
+                for(int k=0;k<d;k++){
+                    //Row-wise
+                    if(getAverageColor(img[i],j,k)==0){
+                        countR++;
+                    }
+
+                    //Column-wise
+                    if(getAverageColor(img[i],k,j)==0){
+                        countC++;
+                    }
+                }
+                vector[l]=countR;
+                vector[(l++)+d]=countC;
+                countR=countC=0;
+            }
+        }
+        return vector;
+    }
+
     public static void main(String[]args)throws IOException{
         //File outputfile = new File("saved.png");
         //ImageIO.write(img[0], "png", outputfile);
@@ -640,7 +670,7 @@ public class Preprocessor{
 
             }
         }
-
+//        new SeparatedVariables(",").writeDigitToBinaryVector("output.dat","out.dat",0,9);
         //new Preprocessor().cropNSave("F:\\MCA\\Research\\zipCodeRecognition\\data\\images\\0\\0img1.png");
     }
 }

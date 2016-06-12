@@ -151,8 +151,33 @@ public class SeparatedVariables {
 
     /**
      * DSV- Delimiter Separated Variable
+     * Method to write an array of characters as separated values in file
      * */
-    private void writeArrayAsDSV(char[]arr,String fileName){
+    public void writeArrayAsDSV(char[]arr,String fileName){
+        try{
+            BufferedWriter bw=new BufferedWriter(new FileWriter(fileName,true));
+            System.out.println(arr.length);
+            String str="";
+            for(int i=0;i<arr.length;i++){
+                str+=arr[i];
+                if(i<arr.length-1)
+                    str+=',';
+                else
+                    str+='\n';
+            }
+            System.out.println(str);
+            bw.write(str);
+            bw.close();
+        }
+        catch(Exception e){
+        }
+    }
+
+    /**
+     * DSV- Delimiter Separated Variable
+     * Method to write an array of integers as separated values in file
+     * */
+    public void writeVectorAsDSV(int []arr,String fileName){
         try{
             BufferedWriter bw=new BufferedWriter(new FileWriter(fileName,true));
             System.out.println(arr.length);
@@ -196,6 +221,9 @@ public class SeparatedVariables {
         }
     }
 
+    /**
+     * Method to write the image as a row-wise vector into a file
+     * */
     public void writeBufferedImageAsDSV(BufferedImage img,String fileName){
         int width,height;
         int count=0;
@@ -216,7 +244,7 @@ public class SeparatedVariables {
         }
     }
 
-    private void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
+    public void writeDigitToBinaryVector(String inFile,String outFile,int start,int limit){
         try {
             BufferedWriter bw=new BufferedWriter(new FileWriter(outFile,true));
             BufferedReader br=new BufferedReader(new FileReader(inFile));

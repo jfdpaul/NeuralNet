@@ -381,7 +381,7 @@ public class NeuralNetwork implements Serializable{
         for(int i=0;i<maxEpoch;i++) {
             double ETotal=0.0;
             for(int j=0;j<(int)Math.floor(dataI.length()*0.7);j++) {
-                Y[0]=new Matrix(dataI.getRow(j).transpose().divide(150.0));
+                Y[0]=new Matrix(dataI.getRow(j).transpose().divide(100.0));
                 D=new Matrix(dataO.getRow(j).transpose());
                 feedForward();
                 ETotal+=calculateError();
@@ -403,14 +403,28 @@ public class NeuralNetwork implements Serializable{
     }
 
     public void test(){
-        double prevErr=0;
-        double ETotal=0.0;
+        int[] right=new int[10];
+        int[] wrong=new int[10];
+        int high;
         for(int j=(int)Math.floor(dataI.length()*0.7);j<dataI.length();j++) {
             Y[0]=new Matrix(dataI.getRow(j).transpose().divide(100.0));
             D=new Matrix(dataO.getRow(j).transpose());
             feedForward();
-            ETotal+=calculateError();
-            backPropagate();
+            high=showHighest();
+            if(D.get(high,0)==1){
+                right[high]++;
+            }
+            else {
+                for (int k = 0; k < 10; k++)
+                    if (D.get(k, 0) == 1){
+                        wrong[k]++;
+                        break;
+                    }
+            }
+        }
+        System.out.println("Test Error = ");
+        for(int i=0;i<10;i++){
+            System.out.println((i)+" = Right="+right[i]+"  Wrong="+wrong[i]);
         }
     }
 
@@ -515,8 +529,9 @@ public class NeuralNetwork implements Serializable{
         }
     }
 
-    public void showHighest() {
-        double max=NET[layer_count-1].get(0,0),maxIndex=0;
+    public int showHighest() {
+        double max=NET[layer_count-1].get(0,0);
+        int maxIndex=0;
         for(int i=0;i<NET[layer_count-1].length();i++) {
             if(NET[layer_count-1].get(i,0)>max){
                 max=NET[layer_count-1].get(i,0);
@@ -524,6 +539,7 @@ public class NeuralNetwork implements Serializable{
             }
         }
         toDisplay("\n"+maxIndex);
+        return maxIndex;
         //new File(file).delete();
     }
 

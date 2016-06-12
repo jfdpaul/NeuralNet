@@ -254,6 +254,7 @@ public class NeuralNetworkApplication {
                 new Thread(()->{
                         int epoch=Integer.parseInt(epochText.getText());
                         nn[0].train(epoch);
+                        nn[0].test();
                         JOptionPane.showMessageDialog(null,"Training Complete");
                 }).start();
             }
